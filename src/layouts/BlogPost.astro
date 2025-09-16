@@ -40,7 +40,13 @@ const socialImage = heroImage
     ? heroImage.src
     : heroImage.src.src
   : '/images/social-card.png'
-const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString()
+// Ensure publishDate/updatedDate are Date instances before calling toISOString()
+const _updatedDate = updatedDate instanceof Date ? updatedDate : updatedDate ? new Date(updatedDate as any) : undefined
+const _publishDate = publishDate instanceof Date ? publishDate : new Date(publishDate as any)
+if (!_publishDate || Number.isNaN(_publishDate.getTime())) {
+  throw new Error(`Invalid publishDate in post data: ${String(publishDate)}`)
+}
+const articleDate = _updatedDate?.toISOString() ?? _publishDate.toISOString()
 const primaryColor = data.heroImage?.color ?? 'hsl(var(--primary) / var(--un-text-opacity))'
 ---
 
