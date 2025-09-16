@@ -1,4 +1,4 @@
-# Astro Theme Pure
+# Welcome to my blog
 
 English | [简体中文](./README-zh-CN.md)
 
