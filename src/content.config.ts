@@ -62,4 +62,4 @@ const docs = defineCollection({
     })
 })
 
-export const content = { blog, docs }
+export const collections = { blog, docs }
