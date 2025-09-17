@@ -5,8 +5,8 @@ import { Quote } from 'astro-pure/advanced'
 import { PostPreview } from 'astro-pure/components/pages'
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
 import { Button, Card, Icon, Label } from 'astro-pure/user'
-import eduFutureGadgetLab from '@/assets/education-future-gadget-lab.png'
-import eduRdfz from '@/assets/education-rdfz.png'
+import eduFutureGadgetLab from '@/assets/projects/education-future-gadget-lab.png'
+import eduRdfz from '@/assets/projects/education-rdfz.png'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ProjectCard from '@/components/home/ProjectCard.astro'
 import Section from '@/components/home/Section.astro'
@@ -14,7 +14,7 @@ import SkillLayout from '@/components/home/SkillLayout.astro'
 import avatar from '@/assets/avatar.png'
 import config from '@/site-config'
 
-const languages = ['Html', 'JavaScript', 'CSS', 'Shell']
+const languages = ['Html', 'JavaScript', 'CSS', 'Shell', 'C', 'Python', 'Java']
 const frontend = ['TypeScript', 'Vite', 'Webpack', 'Astro']
 const backend = ['Vercel', 'Waline']
 
@@ -108,50 +108,19 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
       }
       <Section title='Education'>
         <div class='flex flex-col gap-4'>
-          <ProjectCard
-            heading='未来ガジェット研究所'
-            subheading='Brain Computer Interaction for future haven'
-            imagePath='education-future-gadget-lab.png'
-            altText='Future Gadget Lab'
-            class='h-16 w-auto md:-start-16'
-          />
-          <ProjectCard
-            heading='中国人民大学附属中学'
-            subheading='ICC'
-            imagePath='education-rdfz.png'
-            altText='RDFZ'
-            class='h-16 w-auto md:-start-16'
-          />
+            <ProjectCard
+              heading='未来ガジェット研究所'
+              subheading='Brain Computer Interaction for future haven'
+            />
+            <ProjectCard
+              heading='中国人民大学附属中学'
+              subheading='ICC'
+            />
         </div>
       </Section>
 
       <Section title='Website List'>
-        <div class='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-          <ProjectCard
-            href='https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-            heading='Lorem ipsum'
-            subheading='dolor sit amet, oratio ornatus explicari pro ex'
-            imagePath='/src/assets/projects/alex-tyson-2BAXJ7ha74s-unsplash.jpg'
-          />
-          <ProjectCard
-            href='https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-            heading='Lorem ipsum'
-            subheading='dolor sit amet, oratio ornatus explicari pro ex'
-            imagePath='/src/assets/projects/angelica-teran-Bk9hpaXHK4o-unsplash.jpg'
-          />
-          <ProjectCard
-            href='https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-            heading='Lorem ipsum'
-            subheading='dolor sit amet, oratio ornatus explicari pro ex'
-            imagePath='/src/assets/projects/kseniia-zapiatkina-yATU3rg8tNI-unsplash.jpg'
-          />
-          <ProjectCard
-            href='/projects'
-            heading='More projects'
-            subheading='Check out more projects'
-            imagePath='/src/assets/projects/wen-qiao-g_w8I64FiO0-unsplash.jpg'
-          />
-        </div>
+          <!-- Website List cleared -->
       </Section>
 
       <Section title='Certifications'>

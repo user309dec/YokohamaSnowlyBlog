@@ -1,12 +1,14 @@
 ---
 title: Markdown 语法支持
-publishDate: 2023-07-26 08:00:00
+publishDate: '2023-07-26'
 description: 'Markdown 是一种轻量级的「标记语言」。'
 tags:
   - Markdown
-heroImage: { src: './thumbnail.jpg', color: '#B4C6DA' }
+heroImage: { src: thumbnail, color: '#B4C6DA' }
 language: '中文'
 ---
+
+import thumbnail from './thumbnail.jpg'
 
 ## 基本语法
 
@@ -24,15 +26,14 @@ Markdown 是一种轻量级且易于使用的语法，用于为您的写作设�
 ## 大标题
 
 ### 小标题
-```
 
 标题预览会打乱文章的结构，所以在此不展示。
 
 ### 粗斜体
 
 ```markdown
-_斜体文本_
-
+heroImage: { src: thumbnail, color: '#B4C6DA' }
+import thumbnail from './thumbnail.jpg'
 **粗体文本**
 
 **_粗斜体文本_**

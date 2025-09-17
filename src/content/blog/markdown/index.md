@@ -1,12 +1,14 @@
 ---
 title: Markdown Syntax Support
-publishDate: 2023-07-26 08:00:00
+publishDate: '2023-07-26'
 description: 'Markdown is a lightweight markup language.'
 tags:
   - Markdown
-heroImage: { src: './thumbnail.jpg', color: '#B4C6DA' }
+heroImage: { src: thumbnail, color: '#B4C6DA' }
 language: 'English'
 ---
+
+import thumbnail from './thumbnail.jpg'
 
 ## Basic Syntax
 
@@ -24,15 +26,14 @@ When the content of the article is extensive, you can use headers to segment:
 ## Large Header
 
 ### Small Header
-```
 
 Header previews would disrupt the structure of the article, so they are not displayed here.
 
 ### Bold and Italics
 
 ```markdown
-_Italic text_ and **Bold text**, together will be **_Bold Italic text_**
-```
+heroImage: { src: thumbnail, color: '#B4C6DA' }
+import thumbnail from './thumbnail.jpg'
 
 Preview:
 
