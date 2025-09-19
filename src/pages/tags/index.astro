@@ -3,6 +3,7 @@ import { getBlogCollection, getUniqueTagsWithCount } from 'astro-pure/server'
 import { Button } from 'astro-pure/user'
 import { cn } from 'astro-pure/utils'
 import PageLayout from '@/layouts/BaseLayout.astro'
+import { withBase } from '@/utils/url'
 
 const allPosts = await getBlogCollection()
 const publishedPosts = allPosts.filter(post => !post.data.draft)
@@ -15,7 +16,7 @@ const meta = {
 ---
 
 <PageLayout {meta}>
-  <Button title='Back' href='/blog' variant='back' />
+  <Button title='Back' href={withBase('blog')} variant='back' />
   <main class='mt-6 lg:mt-10'>
     <div id='content-header' class='animate'>
       <h1 class='mb-6 text-3xl font-medium'>Tags</h1>
@@ -28,7 +29,7 @@ const meta = {
             {allTags.map(([tag, val]) => (
               <li>
                 <Button
-                  href={`/tags/${tag}`}
+                  href={withBase(`tags/${tag}`)}
                   variant='pill'
                   class={cn(
                     'items-start gap-x-1',

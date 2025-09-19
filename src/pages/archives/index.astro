@@ -3,6 +3,7 @@ import { PostPreview } from 'astro-pure/components/pages'
 import { getBlogCollection, groupCollectionsByYear, sortMDByDate } from 'astro-pure/server'
 import { Button } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
+import { withBase } from '@/utils/url'
 
 export const prerender = true
 
@@ -18,7 +19,7 @@ const meta = {
 ---
 
 <PageLayout {meta}>
-  <Button title='Back' href='/blog' variant='back' />
+  <Button title='Back' href={withBase('blog')} variant='back' />
 
   <main class='mt-6 lg:mt-10'>
     <div id='content-header' class='animate'>

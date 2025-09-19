@@ -1,5 +1,7 @@
 import type { CardListData, Config, IntegrationUserConfig, ThemeUserConfig } from 'astro-pure/types'
 
+import { withBase } from './utils/url'
+
 export const theme: ThemeUserConfig = {
   // === Basic configuration ===
   /** Title for your website. Will be used in metadata and as browser tab title. */
@@ -9,7 +11,7 @@ export const theme: ThemeUserConfig = {
   /** Description metadata for your website. Can be used in page metadata. */
   description: 'Stay hungry, stay foolish',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
-  favicon: '/favicon/favicon.ico',
+  favicon: withBase('favicon/favicon.ico'),
   /** Specify the default language for this site. */
   locale: {
     lang: 'en-US',
@@ -47,10 +49,10 @@ export const theme: ThemeUserConfig = {
   /** Configure the header of your site. */
   header: {
     menu: [
-      { title: 'Blog', link: '/blog' },
-      { title: 'Projects', link: '/projects' },
-      { title: 'Links', link: '/links' },
-      { title: 'About', link: '/about' }
+      { title: 'Blog', link: withBase('blog') },
+      { title: 'Projects', link: withBase('projects') },
+      { title: 'Links', link: withBase('links') },
+      { title: 'About', link: withBase('about') }
     ]
   },
 
@@ -74,7 +76,7 @@ export const theme: ThemeUserConfig = {
       // Privacy Policy link
       {
         title: 'Site Policy',
-        link: '/terms/list',
+        link: withBase('terms/list'),
         pos: 2 // position set to 2 will be appended to copyright line
       }
     ],

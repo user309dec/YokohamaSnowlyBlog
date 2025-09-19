@@ -13,6 +13,7 @@ import Section from '@/components/home/Section.astro'
 import SkillLayout from '@/components/home/SkillLayout.astro'
 import avatar from '@/assets/avatar.png'
 import config from '@/site-config'
+import { withBase } from '@/utils/url'
 
 const languages = ['Html', 'JavaScript', 'CSS', 'Shell', 'C', 'Python', 'Java']
 const frontend = ['TypeScript', 'Vite', 'Webpack', 'Astro']
@@ -61,7 +62,12 @@ const allPostsByDate = sortMDByDate(publishedPosts).slice(0, MAX_POSTS)
           你好，我是Yokohama Snowly，在米大修读CS/Applied Math/<s>Neuroscience</s>。<br />
           我喜欢玩BF5, Stardew Valley, OSU!和国际象棋
         </p>
-        <Button title='More about me' class='w-fit self-end' href='/about' variant='ahead' />
+        <Button
+          title='More about me'
+          class='w-fit self-end'
+          href={withBase('about')}
+          variant='ahead'
+        />
       </Section>
       {
         allPostsByDate.length > 0 && (
@@ -73,7 +79,12 @@ const allPostsByDate = sortMDByDate(publishedPosts).slice(0, MAX_POSTS)
                 </li>
               ))}
             </ul>
-            <Button title='More posts' class='w-fit self-end' href='/blog' variant='ahead' />
+            <Button
+              title='More posts'
+              class='w-fit self-end'
+              href={withBase('blog')}
+              variant='ahead'
+            />
           </Section>
         )
       }

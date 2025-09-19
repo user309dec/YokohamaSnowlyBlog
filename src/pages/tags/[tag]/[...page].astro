@@ -7,6 +7,7 @@ import { getBlogCollection, getUniqueTags, sortMDByDate } from 'astro-pure/serve
 import { Button } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import config from '@/site-config'
+import { withBase } from '@/utils/url'
 
 export const prerender = true
 
@@ -41,20 +42,20 @@ const paginationProps = {
   ...(page.url.prev && {
     prevUrl: {
       text: `← Previous Tags`,
-      url: page.url.prev
+      url: withBase(page.url.prev)
     }
   }),
   ...(page.url.next && {
     nextUrl: {
       text: `Next Tags →`,
-      url: page.url.next
+      url: withBase(page.url.next)
     }
   })
 }
 ---
 
 <PageLayout {meta}>
-  <Button title='Back' href='/blog' variant='back' />
+  <Button title='Back' href={withBase('blog')} variant='back' />
   <main class='mt-6 lg:mt-10'>
     <div id='content-header' class='animate'>
       <h1 class='mb-6 flex items-end gap-x-2 text-3xl font-medium'>

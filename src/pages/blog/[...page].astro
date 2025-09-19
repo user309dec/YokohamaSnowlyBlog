@@ -7,6 +7,7 @@ import { getBlogCollection, getUniqueTags, sortMDByDate } from 'astro-pure/serve
 import { Button, Icon } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import config from '@/site-config'
+import { withBase } from '@/utils/url'
 
 export const prerender = true
 
@@ -39,20 +40,20 @@ const paginationProps = {
   ...(page.url.prev && {
     prevUrl: {
       text: `← Previous Posts`,
-      url: page.url.prev
+      url: withBase(page.url.prev)
     }
   }),
   ...(page.url.next && {
     nextUrl: {
       text: `Next Posts →`,
-      url: page.url.next
+      url: withBase(page.url.next)
     }
   })
 }
 ---
 
 <PageLayout {meta}>
-  <Button title='Back' href='/' variant='back' />
+  <Button title='Back' href={withBase('/')} variant='back' />
   <main class='mt-6 lg:mt-10'>
     <div id='content-header' class='animate'>
       <h1 class='mb-6 mt-6 text-3xl font-medium sm:mt-10'>Blog</h1>
@@ -68,7 +69,7 @@ const paginationProps = {
               <span class='text-muted-foreground'>
                 Page {page.currentPage} - Showing {page.data.length} of {collectionsCount} posts
               </span>
-              <a aria-label='View all blog by years' href='/archives' data-astro-prefetch>
+              <a aria-label='View all blog by years' href={withBase('archives')} data-astro-prefetch>
                 View all posts by years →
               </a>
             </div>
@@ -91,12 +92,12 @@ const paginationProps = {
               <ul class='text-bgColor flex flex-wrap gap-2'>
                 {uniqueTags.map((tag) => (
                   <li>
-                    <Button title={tag} href={`/tags/${tag}`} variant='pill' />
+                    <Button title={tag} href={withBase(`tags/${tag}`)} variant='pill' />
                   </li>
                 ))}
               </ul>
               <span class='mt-4 block sm:text-end'>
-                <a aria-label='View all blog categories' href='/tags' data-astro-prefetch>
+                <a aria-label='View all blog categories' href={withBase('tags')} data-astro-prefetch>
                   View all →
                 </a>
               </span>
