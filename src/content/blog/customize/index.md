@@ -1,3 +1,5 @@
+import thumbnail from './thumbnail.jpg'
+
 ---
 title: Personalized Customization Guide
 publishDate: '2024-07-27'
@@ -9,8 +11,6 @@ tags:
 heroImage: { src: thumbnail, color: '#64574D' }
 language: 'English'
 ---
-
-import thumbnail from './thumbnail.jpg'
 
 ## Site Configuration
 

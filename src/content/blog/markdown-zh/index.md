@@ -1,3 +1,5 @@
+import thumbnail from './thumbnail.jpg'
+
 ---
 title: Markdown 语法支持
 publishDate: '2023-07-26'
@@ -7,8 +9,6 @@ tags:
 heroImage: { src: thumbnail, color: '#B4C6DA' }
 language: '中文'
 ---
-
-import thumbnail from './thumbnail.jpg'
 
 ## 基本语法
 
@@ -32,8 +32,6 @@ Markdown 是一种轻量级且易于使用的语法，用于为您的写作设�
 ### 粗斜体
 
 ```markdown
-heroImage: { src: thumbnail, color: '#B4C6DA' }
-import thumbnail from './thumbnail.jpg'
 **粗体文本**
 
 **_粗斜体文本_**

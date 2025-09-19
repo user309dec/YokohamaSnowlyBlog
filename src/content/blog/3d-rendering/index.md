@@ -1,3 +1,5 @@
+import thumbnail from './thumbnail.jpg'
+
 ---
 title: "What Is 3D Rendering? Complete Guide to 3D Visualization"
 publishDate: '2025-02-09'
@@ -8,8 +10,6 @@ tags:
 language: 'English'
 heroImage: { src: thumbnail, color: '#D58388' }
 ---
-
-import thumbnail from './thumbnail.jpg'
 
 3D rendering is all around us. From huge action movies to car commercials to previews of upcoming buildings or product designs, 3D visualization has become so widespread and realistic that you probably don’t even know it’s there.
 

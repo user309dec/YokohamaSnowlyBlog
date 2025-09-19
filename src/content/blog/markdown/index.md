@@ -1,3 +1,5 @@
+import thumbnail from './thumbnail.jpg'
+
 ---
 title: Markdown Syntax Support
 publishDate: '2023-07-26'
@@ -7,8 +9,6 @@ tags:
 heroImage: { src: thumbnail, color: '#B4C6DA' }
 language: 'English'
 ---
-
-import thumbnail from './thumbnail.jpg'
 
 ## Basic Syntax
 
@@ -32,8 +32,7 @@ Header previews would disrupt the structure of the article, so they are not disp
 ### Bold and Italics
 
 ```markdown
-heroImage: { src: thumbnail, color: '#B4C6DA' }
-import thumbnail from './thumbnail.jpg'
+**Bold text**
 
 Preview:
 
