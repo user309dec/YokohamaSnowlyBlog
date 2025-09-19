@@ -2,8 +2,8 @@ import thumbnail from './thumbnail.jpg'
 
 ---
 title: "What Is 3D Rendering? Complete Guide to 3D Visualization"
-publishDate: '2025-02-09'
-updatedDate: '2025-02-24'
+publishDate: '2024-02-09'
+updatedDate: '2024-02-24'
 description: "3D imagery has the power to bring cinematic visions to life and help accurately plan tomorrow's cityscapes. Here, 3D expert Ricardo Ortiz explains how it works."
 tags:
   - Example
