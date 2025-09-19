@@ -5,7 +5,8 @@ import { cn } from 'astro-pure/utils'
 import PageLayout from '@/layouts/BaseLayout.astro'
 
 const allPosts = await getBlogCollection()
-const allTags = getUniqueTagsWithCount(allPosts)
+const publishedPosts = allPosts.filter(post => !post.data.draft)
+const allTags = getUniqueTagsWithCount(publishedPosts)
 
 const meta = {
   description: "A list of all the topics I've written about in my posts",

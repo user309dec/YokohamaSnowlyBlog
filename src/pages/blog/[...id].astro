@@ -7,7 +7,9 @@ import PostLayout from '@/layouts/BlogPost.astro'
 export const prerender = true
 
 export async function getStaticPaths() {
-  const posts = sortMDByDate(await getBlogCollection())
+  const allPosts = await getBlogCollection()
+  const publishedPosts = allPosts.filter(post => !post.data.draft)
+  const posts = sortMDByDate(publishedPosts)
   return posts.map((post) => ({
     params: { id: post.id },
     props: { post, posts }

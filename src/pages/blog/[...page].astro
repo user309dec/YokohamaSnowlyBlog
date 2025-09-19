@@ -11,7 +11,9 @@ import config from '@/site-config'
 export const prerender = true
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const collections = sortMDByDate(await getBlogCollection())
+  const allPosts = await getBlogCollection()
+  const publishedPosts = allPosts.filter(post => !post.data.draft)
+  const collections = sortMDByDate(publishedPosts)
   const uniqueTags = getUniqueTags(collections)
   const collectionsCount = collections.length
   return paginate(collections, {

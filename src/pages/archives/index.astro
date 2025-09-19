@@ -7,7 +7,8 @@ import PageLayout from '@/layouts/BaseLayout.astro'
 export const prerender = true
 
 const allPosts = await getBlogCollection()
-const allPostsByDate = sortMDByDate(allPosts)
+const publishedPosts = allPosts.filter(post => !post.data.draft)
+const allPostsByDate = sortMDByDate(publishedPosts)
 const allPostsByYear = groupCollectionsByYear(allPostsByDate)
 
 const meta = {
