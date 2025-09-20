@@ -25,6 +25,19 @@ const {
 <html lang={config.locale.lang}>
   <head>
     <BaseHead {articleDate} {description} {ogImage} {title} />
+    <script is:inline>
+      // Default to dark theme on first visit
+      try {
+        const storage = window.localStorage
+        if (!storage.getItem('theme')) {
+          storage.setItem('theme', 'dark')
+          document.documentElement.classList.add('dark')
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute('content', '#0B0B10')
+        }
+      } catch {}
+    </script>
     <ThemeProvider />
   </head>
 
