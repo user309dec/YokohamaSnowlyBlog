@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="vimGradient" x1="20%" x2="80%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#4CAF50" />
+      <stop offset="100%" stop-color="#0E7A3A" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#vimGradient)" />
+  <path
+    fill="#FFF"
+    d="M18 18h10l4 11l4-11h10l-13 28h-6z"
+  />
+</svg>
