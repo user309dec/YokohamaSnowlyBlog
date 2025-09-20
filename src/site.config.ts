@@ -1,6 +1,9 @@
 import type { CardListData, Config, IntegrationUserConfig, ThemeUserConfig } from 'astro-pure/types'
 
-import { withBase } from './utils/url'
+import { SITE_BASE_PATH } from './config/site'
+import { combineWithBase } from './utils/base-path'
+
+const withStaticBase = (path: string) => combineWithBase(SITE_BASE_PATH, path)
 
 export const theme: ThemeUserConfig = {
   // === Basic configuration ===
@@ -11,7 +14,7 @@ export const theme: ThemeUserConfig = {
   /** Description metadata for your website. Can be used in page metadata. */
   description: 'Stay hungry, stay foolish',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
-  favicon: withBase('favicon/favicon.ico'),
+  favicon: withStaticBase('favicon/favicon.ico'),
   /** Specify the default language for this site. */
   locale: {
     lang: 'en-US',
@@ -49,10 +52,10 @@ export const theme: ThemeUserConfig = {
   /** Configure the header of your site. */
   header: {
     menu: [
-      { title: 'Blog', link: withBase('blog') },
-      { title: 'Projects', link: withBase('projects') },
-      { title: 'Links', link: withBase('links') },
-      { title: 'About', link: withBase('about') }
+      { title: 'Blog', link: 'blog' },
+      { title: 'Projects', link: 'projects' },
+      { title: 'Links', link: 'links' },
+      { title: 'About', link: 'about' }
     ]
   },
 
@@ -76,7 +79,7 @@ export const theme: ThemeUserConfig = {
       // Privacy Policy link
       {
         title: 'Site Policy',
-        link: withBase('terms/list'),
+        link: withStaticBase('terms/list'),
         pos: 2 // position set to 2 will be appended to copyright line
       }
     ],
@@ -178,19 +181,19 @@ export const terms: CardListData = {
   list: [
     {
       title: 'Privacy Policy',
-      link: '/terms/privacy-policy'
+      link: withStaticBase('terms/privacy-policy')
     },
     {
       title: 'Terms and Conditions',
-      link: '/terms/terms-and-conditions'
+      link: withStaticBase('terms/terms-and-conditions')
     },
     {
       title: 'Copyright',
-      link: '/terms/copyright'
+      link: withStaticBase('terms/copyright')
     },
     {
       title: 'Disclaimer',
-      link: '/terms/disclaimer'
+      link: withStaticBase('terms/disclaimer')
     }
   ]
 }
