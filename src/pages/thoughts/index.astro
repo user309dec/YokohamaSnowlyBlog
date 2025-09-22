@@ -1,0 +1,105 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { getCollection } from 'astro:content'
+
+import { Button, Icon } from 'astro-pure/user'
+import { cn } from 'astro-pure/utils'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import ThoughtCard from '@/components/custom/ThoughtCard.astro'
+import { withBase } from '@/utils/url'
+
+const allThoughts = await getCollection('thoughts', (entry) => !entry.data.draft)
+const sortedThoughts: CollectionEntry<'thoughts'>[] = allThoughts.sort(
+  (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
+)
+
+const totalCount = sortedThoughts.length
+const activeTag = Astro.url.searchParams.get('tag')?.toLowerCase() ?? null
+const filteredThoughts = activeTag
+  ? sortedThoughts.filter((thought) => thought.data.tags?.includes(activeTag))
+  : sortedThoughts
+
+const uniqueTags = Array.from(
+  new Set(sortedThoughts.flatMap((thought) => thought.data.tags ?? []))
+).sort()
+
+const baseThoughtsPath = withBase('thoughts')
+
+const meta = {
+  description: 'A stream of quick notes, day-to-day observations, and half-baked ideas that are lighter than full blog posts.',
+  title: 'Thoughts'
+}
+---
+
+<PageLayout {meta}>
+  <Button title='Back' href={withBase('/')} variant='back' />
+
+  <main class='mt-6 lg:mt-10'>
+    <header class='animate space-y-3'>
+      <h1 class='text-3xl font-medium'>Thoughts</h1>
+      <p class='max-w-3xl text-sm text-muted-foreground'>
+        Quick snapshots and informal notes I want to share without polishing them into long-form posts.
+      </p>
+      <p class='text-xs uppercase tracking-widest text-muted-foreground'>
+        Showing {filteredThoughts.length} of {totalCount} entries{activeTag && ` · filtered by #${activeTag}`}
+      </p>
+    </header>
+
+    {uniqueTags.length > 0 && (
+      <section class='animate mt-8 flex flex-wrap items-center gap-2'>
+        <Icon name='hashtag' class='size-4 text-muted-foreground' />
+        <Button
+          href={baseThoughtsPath}
+          variant='pill'
+          class={cn(
+            'transition-colors duration-200',
+            !activeTag && 'bg-primary text-primary-foreground hover:bg-primary/90'
+          )}
+          aria-pressed={!activeTag}
+        >
+          All
+        </Button>
+        {uniqueTags.map((tag) => {
+          const isActive = activeTag === tag
+          return (
+            <Button
+              title={`#${tag}`}
+              href={`${baseThoughtsPath}?tag=${encodeURIComponent(tag)}`}
+              variant='pill'
+              class={cn(
+                'transition-colors duration-200',
+                isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
+              )}
+              aria-pressed={isActive}
+            >
+              #{tag}
+            </Button>
+          )
+        })}
+      </section>
+    )}
+
+    <section class='animate mt-10'>
+      {
+        filteredThoughts.length > 0 ? (
+          <ul class='space-y-5 sm:space-y-6'>
+            {filteredThoughts.map((thought) => (
+              <li>
+                <ThoughtCard entry={thought} activeTag={activeTag} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div class='flex flex-col items-start gap-3 rounded-2xl border border-dashed border-muted-foreground/40 p-6 text-muted-foreground'>
+            <Icon name='info' class='size-10 text-muted-foreground/70' />
+            <p class='text-base'>
+              {activeTag
+                ? `No thoughts yet under #${activeTag}. Try a different tag or clear the filter.`
+                : 'No thoughts have been published yet. Create a new file in src/content/thoughts to share one.'}
+            </p>
+          </div>
+        )
+      }
+    </section>
+  </main>
+</PageLayout>

@@ -58,4 +58,17 @@ const docs = defineCollection({
     })
 })
 
-export const collections = { blog, docs }
+// Define thoughts collection
+const thoughts = defineCollection({
+  schema: () =>
+    z.object({
+      title: z.string().max(80).optional(),
+      publishDate: z.coerce.date(),
+      updatedDate: z.coerce.date().optional(),
+      tags: z.array(z.string()).default([]).transform(removeDupsAndLowerCase),
+      language: z.string().optional(),
+      draft: z.boolean().default(false)
+    })
+})
+
+export const collections = { blog, docs, thoughts }
