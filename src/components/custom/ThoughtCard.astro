@@ -10,7 +10,7 @@ type Props = {
   activeTag?: string | null
 }
 
-const { entry, activeTag = null } = Astro.props
+const { entry, activeTag = null } = Astro.props as Props
 const normalizedActiveTag = activeTag?.toLowerCase() ?? null
 const { Content } = await render(entry)
 const tags = entry.data.tags ?? []
