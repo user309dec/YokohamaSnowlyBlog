@@ -5,6 +5,7 @@ import { Button, Icon } from 'astro-pure/user'
 import { cn } from 'astro-pure/utils'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import { integ } from '@/site-config'
+import { withBase } from '@/utils/url'
 
 interface Props {
   meta: SiteMeta
@@ -12,11 +13,12 @@ interface Props {
   back?: string
 }
 
-const { meta, highlightColor, back = '/', ...props } = Astro.props
+const { meta, highlightColor, back, ...props } = Astro.props
+const backHref = back ?? withBase('/')
 ---
 
 <PageLayout {meta} {highlightColor} {...props}>
-  <Button title='Back' href={back} variant='back' />
+  <Button title='Back' href={backHref} variant='back' />
   <main class='mt-6 items-start gap-x-10 md:flex'>
     {/* Sidebar */}
     <aside
