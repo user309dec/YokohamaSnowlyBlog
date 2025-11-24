@@ -97,6 +97,13 @@ export default defineConfig({
     contentIntellisense: true
   },
   vite: {
+    // Prevent Vite's dep optimizer from trying to bundle virtual modules provided by astro-pure.
+    optimizeDeps: {
+      exclude: ['astro-pure'],
+      esbuildOptions: {
+        external: ['virtual:config']
+      }
+    },
     plugins: [
       //   visualizer({
       //     emitFile: true,
