@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yokohama Snowly Blog"
+  short_description: "Repo subagent for Astro blog maintenance."
+  default_prompt: "Use $yokohama-snowly-blog to make focused changes in the YokohamaSnowlyBlog Astro repo that follow its content schemas, routing structure, and Bun-based validation workflow."
