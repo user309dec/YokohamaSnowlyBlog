@@ -64,7 +64,7 @@ const socialImageURL = new URL(ogImage ?? defaultOgImage, Astro.url).href
 <meta content={config.author} name='author' />
 
 {/* Theme Color */}
-<meta content='' name='theme-color' />
+<meta content='#659EB9' name='theme-color' />
 
 {/* Open Graph / Facebook */}
 <meta content={articleDate ? 'article' : 'website'} property='og:type' />
@@ -112,9 +112,11 @@ const socialImageURL = new URL(ogImage ?? defaultOgImage, Astro.url).href
   /* User script*/
   prod && (
     <script>
-      console.log( '%c Astro Theme Pure %c https://github.com/cworld1/astro-theme-pure/',
-      'color:#fff;background:linear-gradient(90deg,#448bff,#44e9ff);padding:5px 0;',
-      'color:#000;background:linear-gradient(90deg,#44e9ff,#ffffff);padding:5px 10px 5px 0px;' )
+      console.log(
+        '%c Yokohama Snowly %c https://github.com/user309dec/YokohamaSnowlyBlog',
+        'color:#fff;background:linear-gradient(90deg,#659EB9,#8ec5d8);padding:5px 0;',
+        'color:#000;background:linear-gradient(90deg,#8ec5d8,#ffffff);padding:5px 10px 5px 0px;'
+      )
     </script>
   )
 }

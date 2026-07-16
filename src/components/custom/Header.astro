@@ -17,7 +17,7 @@ const menuItems = config.header.menu?.map((item) => ({
     class='z-30 text-xl font-semibold group-[.not-top]:ms-2 sm:group-[.not-top]:ms-3'
     style='transition:margin-inline 0.3s'
     href={withBase('/')}
-    aria-label='Brand'>{config.title}</a
+    aria-label={config.title}>{config.title}</a
   >
 
   <div class='flex items-center gap-x-2'>
@@ -32,7 +32,7 @@ const menuItems = config.header.menu?.map((item) => ({
             <a
               href={item.href}
               class='w-full flex-none grow py-2 text-right font-medium transition-none hover:text-primary sm:w-fit sm:px-3'
-              aria-label='Nav menu item'
+              aria-label={item.title}
             >
               {item.title}
             </a>

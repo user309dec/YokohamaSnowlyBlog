@@ -11,6 +11,9 @@ import { visit } from 'unist-util-visit'
 import config from 'virtual:config'
 
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
+import { SITE_BASE_PATH, SITE_ORIGIN } from '../config/site'
+import { combineWithBase } from '../utils/base-path'
+import { withBase } from '@/utils/url'
 
 // Get dynamic import of images as a map collection
 const imagesGlob = import.meta.glob<{ default: ImageMetadata }>(
@@ -53,26 +56,26 @@ const renderContent = async (post: CollectionEntry<'blog'>, site: URL) => {
   return String(file)
 }
 
-const GET = async (context: AstroGlobal) => {
+const GET = async (_context: AstroGlobal) => {
   const allPosts = await getBlogCollection()
   const publishedPosts = allPosts.filter(post => !post.data.draft)
   const allPostsByDate = sortMDByDate(publishedPosts) as CollectionEntry<'blog'>[]
-  const siteUrl = context.site ?? new URL(import.meta.env.SITE)
+  const siteUrl = new URL(combineWithBase(SITE_BASE_PATH, '/'), SITE_ORIGIN)
 
   return rss({
     // Basic configs
     trailingSlash: false,
     xmlns: { h: 'http://www.w3.org/TR/html4/' },
-    stylesheet: '/scripts/pretty-feed-v3.xsl',
+    stylesheet: withBase('scripts/pretty-feed-v3.xsl'),
 
     // Contents
     title: config.title,
     description: config.description,
-    site: import.meta.env.SITE,
+    site: siteUrl.href,
     items: await Promise.all(
       allPostsByDate.map(async (post) => ({
         pubDate: post.data.publishDate,
-        link: `/blog/${post.id}`,
+        link: withBase(`blog/${post.id}`),
         customData: `<h:img src="${typeof post.data.heroImage?.src === 'string' ? post.data.heroImage?.src : post.data.heroImage?.src.src}" />
           <enclosure url="${typeof post.data.heroImage?.src === 'string' ? post.data.heroImage?.src : post.data.heroImage?.src.src}" />`,
         content: await renderContent(post, siteUrl),

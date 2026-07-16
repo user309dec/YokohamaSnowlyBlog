@@ -35,7 +35,8 @@ const images = import.meta.glob<{ default: ImageMetadata }>(
     href && 'transition-all hover:border-foreground/25 hover:shadow-sm'
   )}
   href={href}
-  target='_blank'
+  target={Tag === 'a' ? '_blank' : undefined}
+  rel={Tag === 'a' ? 'noopener noreferrer' : undefined}
 >
   {imagePath && images[imagePath] && (
     <Image
