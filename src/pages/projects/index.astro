@@ -1,5 +1,57 @@
 ---
+import { Timeline } from 'astro-pure/user'
 import PageLayout from '@/layouts/CommonPage.astro'
+import ProjectSection from '@/components/projects/ProjectSection.astro'
+
+const headings = [
+  { depth: 2, slug: 'featured', text: 'Featured' },
+  { depth: 2, slug: 'timeline', text: 'Timeline' }
+]
 ---
 
-<PageLayout title='Projects' view />
+<PageLayout title='Projects' {headings}>
+  <p>
+    A short list of things I build or contribute to — research, archival work, and this site itself.
+  </p>
+
+  <h2 id='featured'>Featured</h2>
+  <ProjectSection
+    projects={[
+      {
+        name: 'Yokohama Snowly Blog',
+        description:
+          'Personal Astro blog for notes on CS, applied math, neuroscience, and everyday thoughts.',
+        links: [
+          { type: 'github', href: 'https://github.com/user309dec/YokohamaSnowlyBlog' },
+          { type: 'site', href: 'https://user309dec.github.io/YokohamaSnowlyBlog' }
+        ]
+      },
+      {
+        name: 'SciML Research',
+        description:
+          'Student research in Scientific Machine Learning — bridging computational science and modeling.',
+        links: [{ type: 'site', href: 'https://user309dec.github.io/YokohamaSnowlyBlog/about' }]
+      },
+      {
+        name: 'Houston Asian American Archive',
+        description:
+          'Internship supporting archival work on Asian American community history in Houston.',
+        links: [{ type: 'site', href: 'https://haaa.rice.edu/' }]
+      }
+    ]}
+  />
+
+  <h2 id='timeline'>Timeline</h2>
+  <Timeline
+    events={[
+      {
+        date: '2025',
+        content: 'Continuing SciML research and writing on Yokohama Snowly.'
+      },
+      {
+        date: '2024',
+        content: 'Rebuilt the personal site on Astro Theme Pure and started publishing thoughts.'
+      }
+    ]}
+  />
+</PageLayout>

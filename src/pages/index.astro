@@ -5,8 +5,6 @@ import Quote from '@/components/home/Quote.astro'
 import PostPreview from '@/components/custom/PostPreview.astro'
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
 import { Button, Card, Icon, Label } from 'astro-pure/user'
-import eduFutureGadgetLab from '@/assets/projects/education-future-gadget-lab.png'
-import eduRdfz from '@/assets/projects/education-rdfz.png'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ProjectCard from '@/components/home/ProjectCard.astro'
 import Section from '@/components/home/Section.astro'
@@ -15,9 +13,9 @@ import avatar from '@/assets/avatar.png'
 import config from '@/site-config'
 import { withBase } from '@/utils/url'
 
-const languages = ['Html', 'JavaScript', 'CSS', 'Shell', 'C', 'Python', 'Java']
-const frontend = ['TypeScript', 'Vite', 'Webpack', 'Astro']
-const backend = ['Vercel', 'Waline']
+const languages = ['HTML', 'JavaScript', 'TypeScript', 'CSS', 'Shell', 'C', 'Python', 'Java']
+const frontend = ['Astro', 'Vite', 'React']
+const tooling = ['Git', 'Vercel', 'Linux']
 
 const MAX_POSTS = 10
 const allPosts = await getBlogCollection()
@@ -30,13 +28,16 @@ const allPostsByDate = sortMDByDate(publishedPosts).slice(0, MAX_POSTS)
     <section class='animate mb-10 flex flex-col items-center gap-y-7' id='content-header'>
       <Image
         src={avatar}
-        alt='profile'
-        class='h-28 w-auto rounded-full border p-1'
+        alt={`${config.author} avatar`}
+        width={224}
+        height={224}
+        class='h-28 w-28 rounded-full border object-cover p-1'
         loading='eager'
+        densities={[1, 2]}
       />
 
       <div class='flex flex-col items-center gap-y-4'>
-  <h1 class='text-3xl font-bold'>Yokohama Snowly</h1>
+        <h1 class='text-3xl font-bold'>{config.title}</h1>
         <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
           <Label title='Houston, USA'>
             <Icon name='location' class='size-5' slot='icon' />
@@ -51,16 +52,15 @@ const allPostsByDate = sortMDByDate(publishedPosts).slice(0, MAX_POSTS)
           </Label>
         </div>
       </div>
-
-      {/* Get template removed */}
     </section>
 
     <div id='content' class='animate flex flex-col gap-y-10 md:w-4/5 lg:w-5/6'>
       <Section title='About'>
-        <p class='text-muted-foreground'>Developer / Designer/<s>Pre-Med</s></p>
+        <p class='text-muted-foreground'>Developer / Designer · CS / Applied Math / Neuroscience</p>
         <p class='text-muted-foreground'>
-          你好，我是Yokohama Snowly，在米大修读CS/Applied Math/Neuroscience。<br />
-          在我的闲暇时光，我喜欢玩各类射击游戏，魂类游戏和音乐游戏，不过我最喜欢的还是国际象棋和击剑运动
+          你好，我是 Yokohama Snowly（Yechen Liu），在 Rice 修读 CS / Applied Math / Neuroscience。<br
+          />
+          闲暇时喜欢射击、魂类和音乐游戏，最常回来的还是国际象棋和击剑。
         </p>
         <Button
           title='More about me'
@@ -89,63 +89,32 @@ const allPostsByDate = sortMDByDate(publishedPosts).slice(0, MAX_POSTS)
         )
       }
 
-      {
-        /* <Section title='Experience'>
-      <Card
-        heading='Lorem Ipsum'
-        subheading='Sit amet consectetur'
-        date='Dec 2022 - Nov 2023'
-        imagePath='/src/assets/about-astro.png'
-        altText='Lorem, ipsum dolor sit'
-        imageClass='h-12 w-auto md:-start-16'
-      >
-        <ul class='ms-4 list-disc text-muted-foreground'>
-          <li>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolore debitis recusandae, ut
-            molestiae laboriosam pariatur!
-
-            <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, pariatur!</li>
-          </li>
-        </ul>
-      </Card>
-      <Card
-        heading='Lorem Ipsum'
-        subheading='Sit amet consectetur'
-        date='Dec 2022 - Nov 2023'
-        imagePath='/src/assets/about-astro.png'
-        altText='Lorem, ipsum dolor sit'
-        imageClass='h-12 w-auto md:-start-16'
-      />
-    </Section> */
-      }
       <Section title='Education'>
         <div class='flex flex-col gap-4'>
-            <ProjectCard
-              heading='未来ガジェット研究所'
-              subheading='Brain Computer Interaction for future haven'
-            />
-            <ProjectCard
-              heading='中国人民大学附属中学'
-              subheading='C1'
-            />
+          <ProjectCard
+            as='div'
+            heading='Rice University'
+            subheading='CS / Applied Math / Neuroscience · Houston, USA'
+          />
+          <ProjectCard
+            as='div'
+            heading='中国人民大学附属中学'
+            subheading='RDFZ · Beijing, China'
+          />
         </div>
-      </Section>
-
-      <Section title='Website List'>
-          <!-- Website List cleared -->
       </Section>
 
       <Section title='Certifications'>
         <Card
           heading='South Servery Chess King'
-          subheading='在Wises和Hanszen击败一众高手成为南侧食堂棋王'
+          subheading='在 Wises 和 Hanszen 击败一众高手，成为南侧食堂棋王'
         />
       </Section>
 
       <Section title='Skills'>
         <SkillLayout title='Languages' skills={languages} />
         <SkillLayout title='Frontend' skills={frontend} />
-        <SkillLayout title='Backend' skills={backend} />
+        <SkillLayout title='Tooling' skills={tooling} />
       </Section>
     </div>
     <Quote class='mt-12' />

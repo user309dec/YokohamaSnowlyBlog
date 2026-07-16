@@ -1,18 +1,19 @@
 import type { CardListData, Config, IntegrationUserConfig, ThemeUserConfig } from 'astro-pure/types'
 
-import { SITE_BASE_PATH } from './config/site'
+import { SITE_BASE_PATH, SITE_ORIGIN } from './config/site'
 import { combineWithBase } from './utils/base-path'
 
 const withStaticBase = (path: string) => combineWithBase(SITE_BASE_PATH, path)
+const siteUrl = `${SITE_ORIGIN}${SITE_BASE_PATH}`
 
 export const theme: ThemeUserConfig = {
   // === Basic configuration ===
   /** Title for your website. Will be used in metadata and as browser tab title. */
-  title: "Yechen's Blog",
+  title: 'Yokohama Snowly',
   /** Will be used in index page & copyright declaration */
-  author: 'Yechen(Linus) Liu',
+  author: 'Yechen (Linus) Liu',
   /** Description metadata for your website. Can be used in page metadata. */
-  description: 'Stay hungry, stay foolish',
+  description: 'CS / Applied Math / Neuroscience notes from Houston — code, chess, and fencing.',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
   favicon: withStaticBase('favicon/favicon.ico'),
   /** Specify the default language for this site. */
@@ -30,7 +31,7 @@ export const theme: ThemeUserConfig = {
   /** Set a logo image to show in the homepage. */
   logo: {
     src: 'src/assets/avatar.png',
-    alt: 'Avatar'
+    alt: 'Yechen Liu avatar'
   },
 
   // === Global configuration ===
@@ -66,16 +67,11 @@ export const theme: ThemeUserConfig = {
     year: `© ${new Date().getFullYear()}`,
     // year: `© 2019 - ${new Date().getFullYear()}`,
     links: [
-      // Registration link
-      {
-        title: 'Moe ICP 114514',
-        link: 'https://icp.gov.moe/?keyword=114514',
-        style: 'text-sm' // Uno/TW CSS class
-      },
       {
         title: 'Travelling',
         link: 'https://www.travellings.cn/go.html',
-        style: 'text-sm'
+        style: 'text-sm',
+        pos: 1
       },
       // Privacy Policy link
       {
@@ -87,7 +83,7 @@ export const theme: ThemeUserConfig = {
     /** Enable displaying a “Astro & Pure theme powered” link in your site’s footer. */
     credits: true,
     /** Optional details about the social media accounts for this site. */
-    social: { github: 'https://github.com/cworld1/astro-theme-pure' }
+    social: { github: 'https://github.com/user309dec/YokohamaSnowlyBlog' }
   },
 
   content: {
@@ -112,18 +108,15 @@ export const integ: IntegrationUserConfig = {
   links: {
     // Friend logbook
     logbook: [
-      { date: '2025-03-16', content: 'Is there a leakage?' },
-      { date: '2025-03-16', content: 'A leakage of what?' },
-      { date: '2025-03-16', content: 'I have a full seat of water, like, full of water!' },
-      { date: '2025-03-16', content: 'Must be the water.' },
-      { date: '2025-03-16', content: "Let's add that to the words of wisdom." }
+      { date: '2025-03-16', content: 'Opened friend links on Yokohama Snowly.' },
+      { date: '2025-09-23', content: 'Kept writing thoughts and research notes.' }
     ],
     // Yourself link info
     applyTip: [
       { name: 'Name', val: theme.title },
       { name: 'Desc', val: theme.description || 'Null' },
-      { name: 'Link', val: 'https://astro-pure.js.org/' },
-      { name: 'Avatar', val: 'https://astro-pure.js.org/favicon/favicon.ico' }
+      { name: 'Link', val: siteUrl },
+      { name: 'Avatar', val: `${siteUrl}/favicon/android-chrome-192x192.png` }
     ]
   },
   // Enable page search function
@@ -156,11 +149,11 @@ export const integ: IntegrationUserConfig = {
       className: 'zoomable'
     }
   },
-  // Comment system
+  // Comment system — disabled until a personal Waline server is configured
   waline: {
-    enable: true,
+    enable: false,
     // Server service link
-    server: 'https://astro-theme-pure-waline.arthals.ink/',
+    server: '',
     // Refer https://waline.js.org/en/guide/features/emoji.html
     emoji: ['bmoji', 'weibo'],
     // Refer https://waline.js.org/en/reference/client/props.html
