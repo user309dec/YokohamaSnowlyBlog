@@ -11,6 +11,8 @@ import { visit } from 'unist-util-visit'
 import config from 'virtual:config'
 
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
+import { SITE_BASE_PATH, SITE_ORIGIN } from '../config/site'
+import { combineWithBase } from '../utils/base-path'
 import { withBase } from '@/utils/url'
 
 // Get dynamic import of images as a map collection
@@ -58,7 +60,7 @@ const GET = async (context: AstroGlobal) => {
   const allPosts = await getBlogCollection()
   const publishedPosts = allPosts.filter(post => !post.data.draft)
   const allPostsByDate = sortMDByDate(publishedPosts) as CollectionEntry<'blog'>[]
-  const siteUrl = context.site ?? new URL(import.meta.env.SITE)
+  const siteUrl = new URL(combineWithBase(SITE_BASE_PATH, '/'), SITE_ORIGIN)
 
   return rss({
     // Basic configs
@@ -69,7 +71,7 @@ const GET = async (context: AstroGlobal) => {
     // Contents
     title: config.title,
     description: config.description,
-    site: siteUrl,
+    site: siteUrl.href,
     items: await Promise.all(
       allPostsByDate.map(async (post) => ({
         pubDate: post.data.publishDate,
