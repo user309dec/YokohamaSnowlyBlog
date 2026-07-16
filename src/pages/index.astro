@@ -76,20 +76,28 @@ const education = [
         allPostsByDate.length > 0 && (
           <Section title='Posts' index='02'>
             <ul class='post-list flex flex-col'>
-              {allPostsByDate.map((p) => (
-                <li>
-                  <a class='post-row group' href={withBase(`blog/${p.id}`)} data-astro-prefetch>
-                    <FormattedDate
-                      class='post-date font-mono text-xs text-muted-foreground'
-                      date={p.data.updatedDate ?? p.data.publishDate}
-                    />
-                    <span class='post-title group-hover:text-primary'>{p.data.title}</span>
-                    <span class='post-arrow text-muted-foreground group-hover:text-primary' aria-hidden='true'>
-                      →
-                    </span>
-                  </a>
-                </li>
-              ))}
+              {allPostsByDate.map((p) => {
+                const postDate = p.data.updatedDate ?? p.data.publishDate
+                return (
+                  <li>
+                    <a class='post-row group' href={withBase(`blog/${p.id}`)} data-astro-prefetch>
+                      {postDate && (
+                        <FormattedDate
+                          class='post-date font-mono text-xs text-muted-foreground'
+                          date={postDate}
+                        />
+                      )}
+                      <span class='post-title group-hover:text-primary'>{p.data.title}</span>
+                      <span
+                        class='post-arrow text-muted-foreground group-hover:text-primary'
+                        aria-hidden='true'
+                      >
+                        →
+                      </span>
+                    </a>
+                  </li>
+                )
+              })}
             </ul>
             <a class='link-ahead mt-3 self-end' href={withBase('blog')}>More posts</a>
           </Section>
@@ -155,7 +163,7 @@ const education = [
     padding: 0.55rem 1.1rem;
     border-radius: 0.25rem;
     font-size: 0.92rem;
-    font-weight: 550;
+    font-weight: 500;
     letter-spacing: 0.01em;
     transition:
       background-color 0.2s ease,
