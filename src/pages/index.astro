@@ -2,152 +2,266 @@
 import { Image } from 'astro:assets'
 
 import Quote from '@/components/home/Quote.astro'
-import PostPreview from '@/components/custom/PostPreview.astro'
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
-import { Button, Card, Icon, Label } from 'astro-pure/user'
-import eduFutureGadgetLab from '@/assets/projects/education-future-gadget-lab.png'
-import eduRdfz from '@/assets/projects/education-rdfz.png'
+import { FormattedDate } from 'astro-pure/user'
+import heroVisual from '@/assets/projects/angelica-teran-Bk9hpaXHK4o-unsplash.jpg'
 import PageLayout from '@/layouts/BaseLayout.astro'
-import ProjectCard from '@/components/home/ProjectCard.astro'
 import Section from '@/components/home/Section.astro'
 import SkillLayout from '@/components/home/SkillLayout.astro'
-import avatar from '@/assets/avatar.png'
-import config from '@/site-config'
 import { withBase } from '@/utils/url'
 
 const languages = ['Html', 'JavaScript', 'CSS', 'Shell', 'C', 'Python', 'Java']
 const frontend = ['TypeScript', 'Vite', 'Webpack', 'Astro']
 const backend = ['Vercel', 'Waline']
 
-const MAX_POSTS = 10
+const MAX_POSTS = 6
 const allPosts = await getBlogCollection()
-const publishedPosts = allPosts.filter(post => !post.data.draft)
+const publishedPosts = allPosts.filter((post) => !post.data.draft)
 const allPostsByDate = sortMDByDate(publishedPosts).slice(0, MAX_POSTS)
+
+const education = [
+  {
+    heading: '未来ガジェット研究所',
+    subheading: 'Brain Computer Interaction for future haven'
+  },
+  {
+    heading: '中国人民大学附属中学',
+    subheading: 'C1'
+  }
+]
 ---
 
-<PageLayout meta={{ title: 'Home' }} highlightColor='#659EB9'>
-  <main class='flex w-full flex-col items-center'>
-    <section class='animate mb-10 flex flex-col items-center gap-y-7' id='content-header'>
-      <Image
-        src={avatar}
-        alt='profile'
-        class='h-28 w-auto rounded-full border p-1'
-        loading='eager'
-      />
-
-      <div class='flex flex-col items-center gap-y-4'>
-  <h1 class='text-3xl font-bold'>Yokohama Snowly</h1>
-        <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
-          <Label title='Houston, USA'>
-            <Icon name='location' class='size-5' slot='icon' />
-          </Label>
-          <Label
-            title='Source code'
-            as='a'
-            href='https://github.com/user309dec/YokohamaSnowlyBlog'
-            target='_blank'
-          >
-            <Icon name='github' class='size-5' slot='icon' />
-          </Label>
-        </div>
+<PageLayout meta={{ title: 'Home' }} highlightColor='#2A9BB0'>
+  <main class='flex w-full flex-col'>
+    <section class='bleed hero relative -mt-6 mb-16 overflow-hidden sm:-mt-8' id='content-header'>
+      <div class='hero-media absolute inset-0'>
+        <Image
+          src={heroVisual}
+          alt='Modern architectural facade'
+          class='hero-image h-full w-full object-cover'
+          loading='eager'
+          widths={[720, 1080, 1600, 2200]}
+          sizes='100vw'
+        />
+        <div class='hero-veil absolute inset-0' aria-hidden='true'></div>
       </div>
 
-      {/* Get template removed */}
+      <div class='relative z-10 mx-auto flex min-h-[88vh] w-full max-w-[70rem] flex-col justify-end px-4 pb-14 pt-28 sm:px-7 sm:pb-16 lg:px-10'>
+        <div class='hero-copy max-w-2xl'>
+          <p class='tech-label mb-4 text-white/80'>Personal archive</p>
+          <h1 class='brand-title text-white'>Yokohama Snowly</h1>
+          <p class='mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg'>
+            CS / Applied Math / Neuroscience — building clear systems with quiet precision.
+          </p>
+          <div class='mt-8 flex flex-wrap items-center gap-3'>
+            <a class='cta-primary' href={withBase('blog')}>Read the blog</a>
+            <a class='cta-ghost' href={withBase('about')}>About me</a>
+          </div>
+          <div class='hero-rule mt-10 h-px w-28 bg-white/55'></div>
+        </div>
+      </div>
     </section>
 
-    <div id='content' class='animate flex flex-col gap-y-10 md:w-4/5 lg:w-5/6'>
-      <Section title='About'>
-        <p class='text-muted-foreground'>Developer / Designer/<s>Pre-Med</s></p>
-        <p class='text-muted-foreground'>
-          你好，我是Yokohama Snowly，在米大修读CS/Applied Math/Neuroscience。<br />
-          在我的闲暇时光，我喜欢玩各类射击游戏，魂类游戏和音乐游戏，不过我最喜欢的还是国际象棋和击剑运动
+    <div id='content' class='animate mx-auto flex w-full flex-col gap-y-14 md:w-4/5 lg:w-5/6'>
+      <Section title='About' index='01'>
+        <p class='text-muted-foreground'>Developer / Designer</p>
+        <p class='text-muted-foreground leading-relaxed'>
+          你好，我是 Yokohama Snowly，在米大修读 CS / Applied Math / Neuroscience。<br />
+          闲暇时喜欢射击、魂类与音游；国际象棋和击剑是更持久的兴趣。
         </p>
-        <Button
-          title='More about me'
-          class='w-fit self-end'
-          href={withBase('about')}
-          variant='ahead'
-        />
+        <a class='link-ahead mt-2 self-end' href={withBase('about')}>More about me</a>
       </Section>
+
       {
         allPostsByDate.length > 0 && (
-          <Section title='Posts'>
-            <ul class='flex flex-col gap-y-1.5 sm:gap-y-2'>
-              {allPostsByDate.map((p) => (
-                <li class='flex flex-col gap-x-2 sm:flex-row'>
-                  <PostPreview post={p} />
-                </li>
-              ))}
+          <Section title='Posts' index='02'>
+            <ul class='post-list flex flex-col'>
+              {allPostsByDate.map((p) => {
+                const postDate = p.data.updatedDate ?? p.data.publishDate
+                return (
+                  <li>
+                    <a class='post-row group' href={withBase(`blog/${p.id}`)} data-astro-prefetch>
+                      {postDate && (
+                        <FormattedDate
+                          class='post-date font-mono text-xs text-muted-foreground'
+                          date={postDate}
+                        />
+                      )}
+                      <span class='post-title group-hover:text-primary'>{p.data.title}</span>
+                      <span
+                        class='post-arrow text-muted-foreground group-hover:text-primary'
+                        aria-hidden='true'
+                      >
+                        →
+                      </span>
+                    </a>
+                  </li>
+                )
+              })}
             </ul>
-            <Button
-              title='More posts'
-              class='w-fit self-end'
-              href={withBase('blog')}
-              variant='ahead'
-            />
+            <a class='link-ahead mt-3 self-end' href={withBase('blog')}>More posts</a>
           </Section>
         )
       }
 
-      {
-        /* <Section title='Experience'>
-      <Card
-        heading='Lorem Ipsum'
-        subheading='Sit amet consectetur'
-        date='Dec 2022 - Nov 2023'
-        imagePath='/src/assets/about-astro.png'
-        altText='Lorem, ipsum dolor sit'
-        imageClass='h-12 w-auto md:-start-16'
-      >
-        <ul class='ms-4 list-disc text-muted-foreground'>
-          <li>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolore debitis recusandae, ut
-            molestiae laboriosam pariatur!
-
-            <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, pariatur!</li>
-          </li>
+      <Section title='Education' index='03'>
+        <ul class='flex flex-col divide-y divide-border border-y border-border'>
+          {
+            education.map((item) => (
+              <li class='flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6'>
+                <h3 class='text-base font-medium'>{item.heading}</h3>
+                <p class='font-mono text-sm text-muted-foreground'>{item.subheading}</p>
+              </li>
+            ))
+          }
         </ul>
-      </Card>
-      <Card
-        heading='Lorem Ipsum'
-        subheading='Sit amet consectetur'
-        date='Dec 2022 - Nov 2023'
-        imagePath='/src/assets/about-astro.png'
-        altText='Lorem, ipsum dolor sit'
-        imageClass='h-12 w-auto md:-start-16'
-      />
-    </Section> */
-      }
-      <Section title='Education'>
-        <div class='flex flex-col gap-4'>
-            <ProjectCard
-              heading='未来ガジェット研究所'
-              subheading='Brain Computer Interaction for future haven'
-            />
-            <ProjectCard
-              heading='中国人民大学附属中学'
-              subheading='C1'
-            />
+      </Section>
+
+      <Section title='Focus' index='04'>
+        <div class='flex flex-col gap-1 border-y border-border py-4'>
+          <h3 class='text-base font-medium'>South Servery Chess King</h3>
+          <p class='text-sm text-muted-foreground'>
+            在 Wises 和 Hanszen 击败一众高手成为南侧食堂棋王
+          </p>
         </div>
       </Section>
 
-      <Section title='Website List'>
-          <!-- Website List cleared -->
-      </Section>
-
-      <Section title='Certifications'>
-        <Card
-          heading='South Servery Chess King'
-          subheading='在Wises和Hanszen击败一众高手成为南侧食堂棋王'
-        />
-      </Section>
-
-      <Section title='Skills'>
+      <Section title='Skills' index='05'>
         <SkillLayout title='Languages' skills={languages} />
         <SkillLayout title='Frontend' skills={frontend} />
         <SkillLayout title='Backend' skills={backend} />
       </Section>
     </div>
-    <Quote class='mt-12' />
+
+    <div class='mt-16 flex justify-center'>
+      <Quote />
+    </div>
   </main>
 </PageLayout>
+
+<style>
+  .hero {
+    background: hsl(216 28% 10%);
+  }
+
+  .brand-title {
+    font-size: clamp(2.6rem, 8vw, 4.75rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    text-shadow: 0 1px 18px hsl(216 28% 8% / 0.35);
+  }
+
+  .hero-image {
+    object-position: center 40%;
+    filter: saturate(0.78) contrast(1.05);
+  }
+
+  .hero-veil {
+    background:
+      linear-gradient(
+        180deg,
+        hsl(216 28% 8% / 0.42) 0%,
+        hsl(216 28% 8% / 0.62) 42%,
+        hsl(216 28% 8% / 0.88) 100%
+      ),
+      linear-gradient(90deg, hsl(216 28% 8% / 0.55) 0%, hsl(216 28% 8% / 0.2) 58%, transparent 100%);
+  }
+
+  .cta-primary,
+  .cta-ghost,
+  .link-ahead {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 0.25rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .cta-primary {
+    background: hsl(0 0% 100% / 0.95);
+    color: hsl(216 28% 12%);
+  }
+
+  .cta-primary:hover {
+    background: hsl(0 0% 100%);
+    color: hsl(191 72% 28%);
+    transform: translateY(-1px);
+  }
+
+  .cta-ghost {
+    border: 1px solid hsl(0 0% 100% / 0.35);
+    color: hsl(0 0% 100% / 0.92);
+    background: hsl(0 0% 100% / 0.04);
+  }
+
+  .cta-ghost:hover {
+    border-color: hsl(0 0% 100% / 0.7);
+    color: hsl(0 0% 100%);
+    background: hsl(0 0% 100% / 0.1);
+  }
+
+  .link-ahead {
+    width: fit-content;
+    padding-inline: 0;
+    color: hsl(var(--primary));
+  }
+
+  .link-ahead::after {
+    content: ' →';
+    transition: margin-inline-start 0.2s ease;
+  }
+
+  .link-ahead:hover::after {
+    margin-inline-start: 0.2rem;
+  }
+
+  .post-list {
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .post-row {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr auto;
+    align-items: baseline;
+    gap: 0.85rem;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid hsl(var(--border));
+    color: inherit;
+  }
+
+  .post-title {
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .post-arrow {
+    transition:
+      color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .post-row:hover .post-arrow {
+    transform: translateX(0.2rem);
+  }
+
+  @media (max-width: 640px) {
+    .post-row {
+      grid-template-columns: 1fr auto;
+      gap: 0.4rem 0.75rem;
+    }
+
+    .post-date {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
