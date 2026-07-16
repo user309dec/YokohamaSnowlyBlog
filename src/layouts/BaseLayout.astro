@@ -26,34 +26,34 @@ const {
   <head>
     <BaseHead {articleDate} {description} {ogImage} {title} />
     <script is:inline>
-      // Default to dark theme on first visit
+      // Default to light tech-minimal theme on first visit
       try {
         const storage = window.localStorage
         if (!storage.getItem('theme')) {
-          storage.setItem('theme', 'dark')
-          document.documentElement.classList.add('dark')
+          storage.setItem('theme', 'light')
+          document.documentElement.classList.remove('dark')
           document
             .querySelector('meta[name="theme-color"]')
-            ?.setAttribute('content', '#0B0B10')
+            ?.setAttribute('content', '#F4F7FA')
         }
       } catch {}
     </script>
     <ThemeProvider />
   </head>
 
-  <body class='flex justify-center bg-background text-foreground' {...props}>
+  <body class='flex justify-center text-foreground' {...props}>
     {
       highlightColor && (
         <div
           id='highlight-gradient'
-          class='pointer-events-none absolute start-0 top-0 z-0 h-screen w-full opacity-25'
-          style={`background-image:linear-gradient(${highlightColor},transparent)`}
+          class='pointer-events-none absolute start-0 top-0 z-0 h-[70vh] w-full opacity-20'
+          style={`background-image:linear-gradient(180deg,${highlightColor},transparent)`}
         />
       )
     }
-    <div class='w-full max-w-[70rem] px-4 sm:px-7 lg:px-10 min-h-[100dvh] flex flex-col justify-between'>
+    <div class='relative z-10 flex min-h-[100dvh] w-full max-w-[70rem] flex-col justify-between px-4 sm:px-7 lg:px-10'>
       <Header />
-      <div class='flex-1 w-full'>
+      <div class='w-full flex-1'>
         <slot />
       </div>
       <Footer />

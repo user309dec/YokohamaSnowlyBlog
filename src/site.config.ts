@@ -12,7 +12,7 @@ export const theme: ThemeUserConfig = {
   /** Will be used in index page & copyright declaration */
   author: 'Yechen(Linus) Liu',
   /** Description metadata for your website. Can be used in page metadata. */
-  description: 'Stay hungry, stay foolish',
+  description: 'Yokohama Snowly — CS / Applied Math / Neuroscience notes and projects.',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
   favicon: withStaticBase('favicon/favicon.ico'),
   /** Specify the default language for this site. */
@@ -87,7 +87,7 @@ export const theme: ThemeUserConfig = {
     /** Enable displaying a “Astro & Pure theme powered” link in your site’s footer. */
     credits: true,
     /** Optional details about the social media accounts for this site. */
-    social: { github: 'https://github.com/cworld1/astro-theme-pure' }
+    social: { github: 'https://github.com/user309dec/YokohamaSnowlyBlog' }
   },
 
   content: {

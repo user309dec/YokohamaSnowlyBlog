@@ -1,7 +1,7 @@
 /* Animation */
 @keyframes fade-in-up {
   0% {
-    transform: translateY(2rem);
+    transform: translateY(1rem);
     opacity: 0;
   }
   100% {
@@ -11,24 +11,23 @@
 }
 .animate {
   opacity: 0;
-  animation: 300ms fade-in-up;
+  animation: 500ms fade-in-up cubic-bezier(0.22, 1, 0.36, 1);
   animation-fill-mode: forwards;
 }
 @media (prefers-reduced-motion) {
   .animate {
-    opacity: 0;
-    animation: 100ms fade-in-up;
-    animation-fill-mode: forwards;
+    opacity: 1;
+    animation: none;
   }
 }
 #content-header {
-  animation-delay: 50ms;
+  animation-delay: 40ms;
 }
 #content {
-  animation-delay: 100ms;
+  animation-delay: 120ms;
 }
 #sidebar {
-  animation-delay: 150ms;
+  animation-delay: 180ms;
 }
 
 /* Katex */

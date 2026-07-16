@@ -1,12 +1,23 @@
 ---
 import { cn } from 'astro-pure/utils'
 
-const { class: className, title } = Astro.props
+type Props = {
+  class?: string
+  title: string
+  index?: string
+}
+
+const { class: className, title, index } = Astro.props
 ---
 
-<section class={cn('flex flex-col gap-y-5 md:flex-row md:gap-y-0', className)}>
-  <div class='text-xl font-semibold md:min-w-36'>
-    <h2>{title}</h2>
+<section class={cn('flex flex-col gap-y-5 md:flex-row md:gap-x-8 md:gap-y-0', className)}>
+  <div class='md:min-w-36 md:max-w-36'>
+    {
+      index && (
+        <p class='tech-label mb-2'>{index}</p>
+      )
+    }
+    <h2 class='text-xl font-semibold tracking-tight'>{title}</h2>
   </div>
   <div class='flex flex-1 flex-col gap-y-3'>
     <slot />
