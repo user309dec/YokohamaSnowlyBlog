@@ -56,7 +56,7 @@ const renderContent = async (post: CollectionEntry<'blog'>, site: URL) => {
   return String(file)
 }
 
-const GET = async (context: AstroGlobal) => {
+const GET = async (_context: AstroGlobal) => {
   const allPosts = await getBlogCollection()
   const publishedPosts = allPosts.filter(post => !post.data.draft)
   const allPostsByDate = sortMDByDate(publishedPosts) as CollectionEntry<'blog'>[]
