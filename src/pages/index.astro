@@ -4,7 +4,7 @@ import { Image } from 'astro:assets'
 import Quote from '@/components/home/Quote.astro'
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
 import { FormattedDate } from 'astro-pure/user'
-import heroVisual from '@/assets/projects/wen-qiao-g_w8I64FiO0-unsplash.jpg'
+import heroVisual from '@/assets/projects/angelica-teran-Bk9hpaXHK4o-unsplash.jpg'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import Section from '@/components/home/Section.astro'
 import SkillLayout from '@/components/home/SkillLayout.astro'
@@ -37,8 +37,8 @@ const education = [
       <div class='hero-media absolute inset-0'>
         <Image
           src={heroVisual}
-          alt='Minimalistic architectural interior'
-          class='h-full w-full object-cover'
+          alt='Modern architectural facade'
+          class='hero-image h-full w-full object-cover'
           loading='eager'
           widths={[720, 1080, 1600, 2200]}
           sizes='100vw'
@@ -48,16 +48,16 @@ const education = [
 
       <div class='relative z-10 mx-auto flex min-h-[88vh] w-full max-w-[70rem] flex-col justify-end px-4 pb-14 pt-28 sm:px-7 sm:pb-16 lg:px-10'>
         <div class='hero-copy max-w-2xl'>
-          <p class='tech-label mb-4 text-white/75'>Personal archive</p>
+          <p class='tech-label mb-4 text-white/80'>Personal archive</p>
           <h1 class='brand-title text-white'>Yokohama Snowly</h1>
-          <p class='mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg'>
+          <p class='mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg'>
             CS / Applied Math / Neuroscience — building clear systems with quiet precision.
           </p>
           <div class='mt-8 flex flex-wrap items-center gap-3'>
             <a class='cta-primary' href={withBase('blog')}>Read the blog</a>
             <a class='cta-ghost' href={withBase('about')}>About me</a>
           </div>
-          <div class='hero-rule mt-10 h-px w-28 bg-white/50'></div>
+          <div class='hero-rule mt-10 h-px w-28 bg-white/55'></div>
         </div>
       </div>
     </section>
@@ -140,17 +140,32 @@ const education = [
 </PageLayout>
 
 <style>
+  .hero {
+    background: hsl(216 28% 10%);
+  }
+
   .brand-title {
     font-size: clamp(2.6rem, 8vw, 4.75rem);
     font-weight: 700;
     letter-spacing: -0.04em;
     line-height: 0.95;
+    text-shadow: 0 1px 18px hsl(216 28% 8% / 0.35);
+  }
+
+  .hero-image {
+    object-position: center 40%;
+    filter: saturate(0.78) contrast(1.05);
   }
 
   .hero-veil {
     background:
-      linear-gradient(180deg, hsl(216 28% 8% / 0.18) 0%, hsl(216 28% 8% / 0.55) 48%, hsl(216 28% 8% / 0.82) 100%),
-      linear-gradient(90deg, hsl(216 28% 8% / 0.35) 0%, transparent 55%);
+      linear-gradient(
+        180deg,
+        hsl(216 28% 8% / 0.42) 0%,
+        hsl(216 28% 8% / 0.62) 42%,
+        hsl(216 28% 8% / 0.88) 100%
+      ),
+      linear-gradient(90deg, hsl(216 28% 8% / 0.55) 0%, hsl(216 28% 8% / 0.2) 58%, transparent 100%);
   }
 
   .cta-primary,
