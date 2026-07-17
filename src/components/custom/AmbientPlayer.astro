@@ -1,0 +1,310 @@
+---
+// Floating ambient-music toggle. Music is synthesized live with the Web Audio
+// API (no audio files): a slowly drifting chord pad, pentatonic plucks through
+// a feedback delay, a sine sub drone and generated-impulse reverb.
+// Publishes live frequency levels to window.__AMBIENT__ for the hero visuals.
+---
+
+<button
+  id='ambient-toggle'
+  class='ambient-toggle'
+  type='button'
+  aria-pressed='false'
+  title='Ambient sound'
+>
+  <span class='eq' aria-hidden='true'>
+    <span></span><span></span><span></span><span></span><span></span>
+  </span>
+  <span class='ambient-label'>AMBIENT</span>
+</button>
+
+<style>
+  .ambient-toggle {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card) / 0.72);
+    color: hsl(var(--muted-foreground));
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .ambient-toggle:hover {
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.5);
+  }
+
+  .ambient-toggle[aria-pressed='true'] {
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.55);
+    box-shadow: 0 0 calc(6px + var(--amp, 0) * 22px) hsl(var(--surface-glow) / 0.45);
+  }
+
+  .eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+
+  .eq span {
+    width: 2.5px;
+    height: 3px;
+    border-radius: 1px;
+    background: currentColor;
+    transition: height 0.09s linear;
+  }
+
+  @media (max-width: 640px) {
+    .ambient-label {
+      display: none;
+    }
+    .ambient-toggle {
+      padding: 0.55rem 0.7rem;
+    }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('ambient-toggle') as HTMLButtonElement | null
+  const bars = btn ? Array.from(btn.querySelectorAll('.eq span')) : []
+  const levels = { bass: 0, mid: 0, high: 0, level: 0, playing: false }
+  ;(window as any).__AMBIENT__ = levels
+
+  // A-minor pentatonic space; chords stay diatonic so drifting always resolves
+  const CHORDS = [
+    [45, 52, 60, 64], // Am
+    [41, 48, 57, 60], // F
+    [48, 55, 62, 64], // C add9
+    [43, 50, 59, 62] // G
+  ]
+  const SCALE = [57, 60, 62, 64, 67, 69, 72, 74, 76, 79, 81]
+  const mtof = (m: number) => 440 * Math.pow(2, (m - 69) / 12)
+
+  let ctx: AudioContext | null = null
+  let analyser: AnalyserNode | null = null
+  let master: GainNode | null = null
+  let padOscs: OscillatorNode[] = []
+  let bassOsc: OscillatorNode | null = null
+  let reverbIn: GainNode | null = null
+  let delayIn: DelayNode | null = null
+  let pluckTimer = 0
+  let chordTimer = 0
+  let raf = 0
+  let chordIdx = 0
+
+  function makeImpulse(ac: AudioContext, seconds: number) {
+    const rate = ac.sampleRate
+    const len = Math.floor(rate * seconds)
+    const buf = ac.createBuffer(2, len, rate)
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buf.getChannelData(ch)
+      for (let i = 0; i < len; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6)
+      }
+    }
+    return buf
+  }
+
+  function buildEngine() {
+    const AC = window.AudioContext || (window as any).webkitAudioContext
+    const ac: AudioContext = new AC()
+    ctx = ac
+
+    master = ac.createGain()
+    master.gain.value = 0
+    const comp = ac.createDynamicsCompressor()
+    comp.threshold.value = -22
+    comp.ratio.value = 6
+    analyser = ac.createAnalyser()
+    analyser.fftSize = 256
+    analyser.smoothingTimeConstant = 0.82
+    master.connect(comp).connect(analyser).connect(ac.destination)
+
+    // Reverb bus
+    const verb = ac.createConvolver()
+    verb.buffer = makeImpulse(ac, 3.2)
+    const verbGain = ac.createGain()
+    verbGain.gain.value = 0.5
+    reverbIn = ac.createGain()
+    reverbIn.connect(verb).connect(verbGain).connect(master)
+
+    // Feedback delay bus (plucks) feeding the reverb too
+    delayIn = ac.createDelay(1.0)
+    delayIn.delayTime.value = 0.42
+    const fb = ac.createGain()
+    fb.gain.value = 0.34
+    const delayOut = ac.createGain()
+    delayOut.gain.value = 0.5
+    delayIn.connect(fb).connect(delayIn)
+    delayIn.connect(delayOut)
+    delayOut.connect(master)
+    delayOut.connect(reverbIn)
+
+    // Chord pad: four detuned saws through a slowly breathing lowpass
+    const padFilter = ac.createBiquadFilter()
+    padFilter.type = 'lowpass'
+    padFilter.frequency.value = 520
+    padFilter.Q.value = 0.8
+    const padGain = ac.createGain()
+    padGain.gain.value = 0.05
+    padFilter.connect(padGain)
+    padGain.connect(master)
+    padGain.connect(reverbIn)
+
+    const lfo = ac.createOscillator()
+    lfo.frequency.value = 0.05
+    const lfoAmt = ac.createGain()
+    lfoAmt.gain.value = 220
+    lfo.connect(lfoAmt).connect(padFilter.frequency)
+    lfo.start()
+
+    padOscs = CHORDS[0].map((m, i) => {
+      const osc = ac.createOscillator()
+      osc.type = 'sawtooth'
+      osc.frequency.value = mtof(m)
+      osc.detune.value = i % 2 === 0 ? 4 : -4
+      osc.connect(padFilter)
+      osc.start()
+      return osc
+    })
+
+    // Sub drone follows the chord root, one octave down
+    bassOsc = ac.createOscillator()
+    bassOsc.type = 'sine'
+    bassOsc.frequency.value = mtof(CHORDS[0][0] - 12)
+    const bassGain = ac.createGain()
+    bassGain.gain.value = 0.11
+    bassOsc.connect(bassGain).connect(master)
+    bassOsc.start()
+
+    const glideChord = () => {
+      chordIdx = (chordIdx + 1) % CHORDS.length
+      const chord = CHORDS[chordIdx]
+      const t = ac.currentTime
+      padOscs.forEach((osc, i) => {
+        osc.frequency.setTargetAtTime(mtof(chord[i]), t, 2.5)
+      })
+      bassOsc?.frequency.setTargetAtTime(mtof(chord[0] - 12), t, 2.5)
+      chordTimer = window.setTimeout(glideChord, 11000 + Math.random() * 5000)
+    }
+    chordTimer = window.setTimeout(glideChord, 12000)
+
+    const pluck = () => {
+      const midi = SCALE[Math.floor(Math.random() * SCALE.length)]
+      const t = ac.currentTime
+      const osc = ac.createOscillator()
+      osc.type = 'triangle'
+      osc.frequency.value = mtof(midi)
+      const env = ac.createGain()
+      env.gain.setValueAtTime(0, t)
+      env.gain.linearRampToValueAtTime(0.08 + Math.random() * 0.05, t + 0.012)
+      const decay = 1.1 + Math.random() * 1.4
+      env.gain.exponentialRampToValueAtTime(0.0001, t + decay)
+      osc.connect(env)
+      env.connect(delayIn!)
+      env.connect(reverbIn!)
+      osc.start(t)
+      osc.stop(t + decay + 0.1)
+      pluckTimer = window.setTimeout(pluck, 350 + Math.random() * 900)
+    }
+    pluckTimer = window.setTimeout(pluck, 600)
+  }
+
+  const freq = new Uint8Array(128)
+  function meterLoop() {
+    if (!levels.playing || !analyser) return
+    analyser.getByteFrequencyData(freq)
+    const avg = (a: number, b: number) => {
+      let s = 0
+      for (let i = a; i < b; i++) s += freq[i]
+      return s / (b - a) / 255
+    }
+    // fftSize 256 @ 44.1kHz -> ~172Hz per bin; this soft ambient palette
+    // carries most energy below ~3kHz, so bands sit low with makeup gain.
+    levels.bass = Math.min(1, avg(1, 5) * 1.15)
+    levels.mid = Math.min(1, avg(5, 17) * 1.7)
+    levels.high = Math.min(1, avg(17, 64) * 2.6)
+    levels.level = (levels.bass + levels.mid + levels.high) / 3
+
+    bars.forEach((bar, i) => {
+      const v = [levels.bass, levels.mid, levels.level, levels.mid, levels.high][i] ?? 0
+      ;(bar as HTMLElement).style.height = `${3 + v * 12}px`
+    })
+    btn?.style.setProperty('--amp', levels.level.toFixed(3))
+    raf = requestAnimationFrame(meterLoop)
+  }
+
+  function resetMeter() {
+    cancelAnimationFrame(raf)
+    levels.bass = levels.mid = levels.high = levels.level = 0
+    bars.forEach((bar) => ((bar as HTMLElement).style.height = '3px'))
+    btn?.style.setProperty('--amp', '0')
+  }
+
+  async function startAudio() {
+    if (!ctx) buildEngine()
+    await ctx!.resume()
+    const t = ctx!.currentTime
+    master!.gain.cancelScheduledValues(t)
+    master!.gain.setTargetAtTime(0.9, t, 0.8)
+    levels.playing = true
+    btn?.setAttribute('aria-pressed', 'true')
+    localStorage.setItem('ambient-audio', 'on')
+    raf = requestAnimationFrame(meterLoop)
+  }
+
+  async function stopAudio() {
+    levels.playing = false
+    btn?.setAttribute('aria-pressed', 'false')
+    localStorage.setItem('ambient-audio', 'off')
+    if (ctx && master) {
+      const t = ctx.currentTime
+      master.gain.cancelScheduledValues(t)
+      master.gain.setTargetAtTime(0, t, 0.25)
+      await new Promise((r) => setTimeout(r, 700))
+      if (!levels.playing) await ctx.suspend()
+    }
+    resetMeter()
+  }
+
+  btn?.addEventListener('click', () => {
+    if (levels.playing) void stopAudio()
+    else void startAudio()
+  })
+
+  // If the visitor had ambient on, resume on their first interaction
+  // (browsers block audio before a user gesture).
+  if (localStorage.getItem('ambient-audio') === 'on') {
+    const resume = (e: Event) => {
+      // Let the toggle's own click handler win, otherwise this fires first
+      // and the click immediately toggles the audio back off.
+      if (btn && e.target instanceof Node && btn.contains(e.target)) return
+      window.removeEventListener('pointerdown', resume)
+      window.removeEventListener('keydown', resume)
+      if (!levels.playing) void startAudio()
+    }
+    window.addEventListener('pointerdown', resume)
+    window.addEventListener('keydown', resume)
+  }
+
+  window.addEventListener('beforeunload', () => {
+    window.clearTimeout(pluckTimer)
+    window.clearTimeout(chordTimer)
+  })
+</script>
