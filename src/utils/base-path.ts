@@ -11,7 +11,7 @@ export function normalizeBasePath(base: string | undefined | null) {
 export function combineWithBase(base: string | undefined | null, path: string) {
   const prefix = normalizeBasePath(base)
   if (!path) {
-    return prefix === '/' ? '/' : `${prefix}/`
+    return prefix
   }
 
   if (EXTERNAL_LINK_REGEX.test(path)) {
@@ -26,9 +26,7 @@ export function combineWithBase(base: string | undefined | null, path: string) {
     ? prefix === '/'
       ? `/${cleanedPath}`
       : `${prefix}/${cleanedPath}`
-    : prefix === '/'
-      ? '/'
-      : `${prefix}/`
+    : prefix
 
   const query = search ? `?${search}` : ''
   const hashPart = hash ? `#${hash}` : ''
