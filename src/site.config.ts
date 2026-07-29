@@ -8,9 +8,9 @@ const withStaticBase = (path: string) => combineWithBase(SITE_BASE_PATH, path)
 export const theme: ThemeUserConfig = {
   // === Basic configuration ===
   /** Title for your website. Will be used in metadata and as browser tab title. */
-  title: "Yechen's Blog",
+  title: "Yokohama Snowly's Blog",
   /** Will be used in index page & copyright declaration */
-  author: 'Yechen(Linus) Liu',
+  author: 'Yokohama Snowly',
   /** Description metadata for your website. Can be used in page metadata. */
   description: 'Yokohama Snowly — CS / Applied Math / Neuroscience notes and projects.',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
@@ -56,7 +56,8 @@ export const theme: ThemeUserConfig = {
       { title: 'Thoughts', link: 'thoughts' },
       { title: 'Projects', link: 'projects' },
       { title: 'Links', link: 'links' },
-      { title: 'About', link: 'about' }
+      { title: 'About', link: 'about' },
+      { title: 'Terminal', link: 'terminal' }
     ]
   },
 

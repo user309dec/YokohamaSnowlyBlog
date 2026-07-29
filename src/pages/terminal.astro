@@ -1,0 +1,861 @@
+---
+import { getCollection } from 'astro:content'
+
+import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
+import { withBase } from '@/utils/url'
+import { theme } from '@/site-config'
+
+export const prerender = true
+
+const allPosts = await getBlogCollection()
+const posts = sortMDByDate(allPosts.filter((post) => !post.data.draft))
+  .slice(0, 20)
+  .map((post) => ({
+    title: post.data.title,
+    date: post.data.publishDate?.toISOString().slice(0, 10) ?? '',
+    tags: post.data.tags,
+    url: withBase(`blog/${post.id}`)
+  }))
+
+const thoughts = (await getCollection('thoughts', (entry) => !entry.data.draft))
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 6)
+  .map((entry) => ({
+    title: entry.data.title ?? '',
+    date: entry.data.publishDate.toISOString().slice(0, 10),
+    tags: entry.data.tags
+  }))
+
+const pages: Record<string, string> = {
+  home: withBase('/'),
+  blog: withBase('blog'),
+  thoughts: withBase('thoughts'),
+  projects: withBase('projects'),
+  links: withBase('links'),
+  about: withBase('about'),
+  archives: withBase('archives'),
+  search: withBase('search')
+}
+
+// figlet-style banner (Big font)
+const banner = [
+  String.raw`  _____  _   _   ____  __          __ _      __     __`,
+  String.raw` / ____|| \ | | / __ \ \ \        / /| |     \ \   / /`,
+  String.raw`| (___  |  \| || |  | | \ \  /\  / / | |      \ \_/ / `,
+  String.raw` \___ \ | . ' || |  | |  \ \/  \/ /  | |       \   /  `,
+  String.raw` ____) || |\  || |__| |   \  /\  /   | |____    | |   `,
+  String.raw`|_____/ |_| \_| \____/     \/  \/    |______|   |_|   `
+]
+
+const termData = {
+  siteTitle: theme.title,
+  author: theme.author,
+  github: 'https://github.com/user309dec',
+  pages,
+  posts,
+  thoughts,
+  banner
+}
+
+const json = JSON.stringify(termData).replace(/</g, '\\u003c')
+const pageTitle = `Terminal ${theme.titleDelimiter ?? '•'} ${theme.title}`
+---
+
+<!doctype html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <title>{pageTitle}</title>
+    <meta name='description' content='An interactive terminal for Yokohama Snowly blog.' />
+    <link rel='icon' href={theme.favicon} />
+  </head>
+  <body>
+    <div id='crt'>
+      <header id='bar'>
+        <span class='bar-title'>SNOWLY-TERM v1.0</span>
+        <span id='clock'>--:--:--</span>
+        <a class='bar-exit' href={pages.home}>[ EXIT ]</a>
+      </header>
+      <main id='screen'>
+        <div id='output'></div>
+        <div id='input-line' style='display:none'>
+          <span class='prompt'>visitor@snowly:~$&nbsp;</span><span id='typed'></span><span
+            id='caret'>█</span
+          >
+        </div>
+      </main>
+      <div id='snow-layer' aria-hidden='true'></div>
+      <input
+        id='cmd'
+        type='text'
+        autocomplete='off'
+        autocapitalize='off'
+        autocorrect='off'
+        spellcheck='false'
+        aria-label='Terminal input'
+      />
+    </div>
+
+    <script is:inline type='application/json' id='term-data' set:html={json} />
+
+    <script>
+      type Post = { title: string; date: string; tags: string[]; url: string }
+      type Thought = { title: string; date: string; tags: string[] }
+      type TermData = {
+        siteTitle: string
+        author: string
+        github: string
+        pages: Record<string, string>
+        posts: Post[]
+        thoughts: Thought[]
+        banner: string[]
+      }
+
+      const D: TermData = JSON.parse(document.getElementById('term-data')!.textContent ?? '{}')
+
+      const screen = document.getElementById('screen') as HTMLElement
+      const output = document.getElementById('output') as HTMLElement
+      const inputLine = document.getElementById('input-line') as HTMLElement
+      const typedEl = document.getElementById('typed') as HTMLElement
+      const cmdInput = document.getElementById('cmd') as HTMLInputElement
+      const clockEl = document.getElementById('clock') as HTMLElement
+      const snowLayer = document.getElementById('snow-layer') as HTMLElement
+
+      const bootTime = Date.now()
+      const history: string[] = []
+      let historyIdx = -1
+      let lastListing: Post[] = []
+      let skipBoot = false
+
+      const esc = (s: string) =>
+        s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+      // all site links open in a new tab so the terminal stays alive
+      const link = (url: string, text: string) =>
+        `<a href='${url}' target='_blank' rel='noopener'>${esc(text)}</a>`
+
+      const scrollDown = () => {
+        screen.scrollTop = screen.scrollHeight
+      }
+
+      function print(html = '', cls = '') {
+        const div = document.createElement('div')
+        div.className = cls ? `line ${cls}` : 'line'
+        div.innerHTML = html === '' ? '&nbsp;' : html
+        output.appendChild(div)
+        scrollDown()
+        return div
+      }
+
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+      /** Time-based typewriter; keeps a steady speed and flushes instantly once skipBoot is set. */
+      function typeLine(text: string, cls = '', charsPerSec = 160): Promise<void> {
+        return new Promise((resolve) => {
+          const div = print('', cls)
+          if (text === '') {
+            resolve()
+            return
+          }
+          const start = performance.now()
+          const timer = setInterval(() => {
+            const elapsed = (performance.now() - start) / 1000
+            const n = skipBoot ? text.length : Math.max(1, Math.floor(elapsed * charsPerSec))
+            div.textContent = text.slice(0, Math.min(text.length, n))
+            scrollDown()
+            if (n >= text.length) {
+              clearInterval(timer)
+              resolve()
+            }
+          }, 24)
+        })
+      }
+
+      // ---------- clock ----------
+      const tick = () => {
+        clockEl.textContent = new Date().toTimeString().slice(0, 8)
+      }
+      tick()
+      setInterval(tick, 1000)
+
+      // ---------- snow ----------
+      let snowTimer: ReturnType<typeof setInterval> | null = null
+      function toggleSnow(): boolean {
+        if (snowTimer) {
+          clearInterval(snowTimer)
+          snowTimer = null
+          snowLayer.innerHTML = ''
+          return false
+        }
+        snowTimer = setInterval(() => {
+          if (snowLayer.childElementCount > 60) return
+          const flake = document.createElement('span')
+          flake.className = 'flake'
+          flake.textContent = Math.random() > 0.5 ? '❄' : '·'
+          flake.style.left = `${Math.random() * 100}%`
+          flake.style.animationDuration = `${4 + Math.random() * 6}s`
+          flake.style.fontSize = `${8 + Math.random() * 10}px`
+          flake.addEventListener('animationend', () => flake.remove())
+          snowLayer.appendChild(flake)
+        }, 180)
+        return true
+      }
+
+      // ---------- command output helpers ----------
+      function printBanner() {
+        for (const row of D.banner) print(esc(row), 'banner glow')
+        print(
+          `<span class='dim'>·:·:·:·:·:·:·:·  Y O K O H A M A &nbsp; S N O W L Y  ·:·:·:·:·:·:·:·</span>`
+        )
+        print()
+      }
+
+      function listPosts(n?: number) {
+        const count = Math.max(1, Math.min(n ?? 10, D.posts.length))
+        lastListing = D.posts.slice(0, count)
+        print(
+          `<span class='amber'>Recent posts</span> <span class='dim'>(${D.posts.length} total)</span>`
+        )
+        print()
+        lastListing.forEach((p, i) => {
+          const tags = p.tags.map((t) => `#${esc(t)}`).join(' ')
+          print(
+            ` <span class='dim'>[${String(i + 1).padStart(2, ' ')}]</span> <span class='dim'>${p.date}</span>  ${link(p.url, p.title)}  <span class='dim'>${tags}</span>`
+          )
+        })
+        print()
+        print(`<span class='dim'>type 'open &lt;n&gt;' to read a post, e.g. open 1</span>`)
+      }
+
+      function listThoughts() {
+        print(`<span class='amber'>Recent thoughts</span>`)
+        print()
+        D.thoughts.forEach((t) => {
+          const label = t.title || t.tags.map((x) => `#${x}`).join(' ') || 'untitled'
+          print(
+            ` <span class='dim'>·</span> <span class='dim'>${t.date}</span>  ${link(D.pages.thoughts!, label)}`
+          )
+        })
+        print()
+        print(`<span class='dim'>full stream at 'cd thoughts'</span>`)
+      }
+
+      function neofetch() {
+        const nav = navigator as Navigator & { userAgentData?: { platform?: string } }
+        const ua = nav.userAgent
+        const os = nav.userAgentData?.platform
+          ? nav.userAgentData.platform
+          : /Mac/i.test(ua)
+            ? 'macOS'
+            : /Windows/i.test(ua)
+              ? 'Windows'
+              : /Android/i.test(ua)
+                ? 'Android'
+                : /iPhone|iPad/i.test(ua)
+                  ? 'iOS'
+                  : /Linux/i.test(ua)
+                    ? 'Linux'
+                    : 'Unknown'
+        const browser = /Edg\//.test(ua)
+          ? 'Edge'
+          : /Firefox\//.test(ua)
+            ? 'Firefox'
+            : /Chrome\//.test(ua)
+              ? 'Chrome'
+              : /Safari\//.test(ua)
+                ? 'Safari'
+                : 'Browser'
+        const art = [
+          '        .    *    .      ',
+          '     *    .   .    *     ',
+          '   .    \\   |   /    .   ',
+          '     .   \\  |  /   .     ',
+          '  * ~ ---==[*]==--- ~ *  ',
+          "     '   /  |  \\   '     ",
+          "   '    /   |   \\    '   ",
+          "     *    '   '    *     ",
+          "        '    *    '      "
+        ]
+        const info = [
+          `<span class='amber'>visitor@snowly</span>`,
+          `<span class='dim'>──────────────</span>`,
+          `<span class='amber'>Host</span>    : ${esc(D.siteTitle)}`,
+          `<span class='amber'>Kernel</span>  : astro-pure 4.0.8`,
+          `<span class='amber'>Shell</span>   : snowsh 1.0`,
+          `<span class='amber'>Display</span> : ${window.screen.width}x${window.screen.height} @${window.devicePixelRatio}x`,
+          `<span class='amber'>Client</span>  : ${browser} on ${os}`,
+          `<span class='amber'>Posts</span>   : ${D.posts.length} articles`,
+          `<span class='amber'>Uptime</span>  : ${Math.round((Date.now() - bootTime) / 1000)}s`
+        ]
+        print()
+        for (let i = 0; i < Math.max(art.length, info.length); i++) {
+          const left = esc(art[i] ?? ' '.repeat(25))
+          print(`<span class='glow'>${left}</span>  ${info[i] ?? ''}`)
+        }
+        print()
+      }
+
+      function goto(url: string, label: string) {
+        const a = document.createElement('a')
+        a.href = url
+        a.target = '_blank'
+        a.rel = 'noopener'
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        print(`Opening ${link(url, label)} in a new tab ...`)
+      }
+
+      // ---------- commands ----------
+      type Command = { desc: string; hidden?: boolean; fn: (args: string[]) => unknown }
+
+      const commands: Record<string, Command> = {
+        help: {
+          desc: 'list available commands',
+          fn: () => {
+            print(`<span class='amber'>Available commands</span>`)
+            print()
+            for (const [name, c] of Object.entries(commands)) {
+              if (c.hidden) continue
+              print(
+                `  <span class='cmd-name'>${name.padEnd(12, ' ')}</span><span class='dim'>${c.desc}</span>`
+              )
+            }
+            print()
+            print(
+              `<span class='dim'>↑/↓ history · Tab completion · Ctrl+L clear · there may be secrets…</span>`
+            )
+          }
+        },
+        about: {
+          desc: 'who runs this place',
+          fn: () => {
+            print(`<span class='amber'>${esc(D.author)}</span> — developer / designer`)
+            print(`Student researcher @ Scientific Machine Learning (SciML),`)
+            print(`intern @ Houston Asian American Archive.`)
+            print()
+            print(`Interests: computational science · chemistry · Asian immigrant`)
+            print(`history · Ming Dynasty · and whatever is falling like snow today.`)
+            print()
+            print(`<span class='dim'>Motto: 见诸相非相，即见如来</span>`)
+            print()
+            print(
+              `<span class='dim'>try 'blog' to read, 'contact' to say hi, 'cd about' for the full page</span>`
+            )
+          }
+        },
+        blog: {
+          desc: 'list recent posts (blog [n])',
+          fn: (args) => listPosts(args[0] ? parseInt(args[0], 10) : undefined)
+        },
+        thoughts: { desc: 'recent short thoughts', fn: () => listThoughts() },
+        open: {
+          desc: 'open the n-th listed post',
+          fn: (args) => {
+            const arg = args[0]
+            if (!arg) {
+              print(`usage: open &lt;n&gt; — run 'blog' first to list posts`, 'red')
+              return
+            }
+            if (/^\d+$/.test(arg)) {
+              if (lastListing.length === 0) {
+                print(`Nothing listed yet. Run 'blog' first.`, 'red')
+                return
+              }
+              const post = lastListing[parseInt(arg, 10) - 1]
+              if (!post) {
+                print(`open: index out of range (1-${lastListing.length})`, 'red')
+                return
+              }
+              goto(post.url, post.title)
+              return
+            }
+            if (D.pages[arg]) {
+              goto(D.pages[arg], arg)
+              return
+            }
+            print(`open: unknown target '${esc(arg)}'`, 'red')
+          }
+        },
+        cd: {
+          desc: 'jump to a page (cd blog)',
+          fn: (args) => {
+            const target = args[0]
+            if (!target || target === '~' || target === '..' || target === 'home') {
+              goto(D.pages.home!, 'home')
+              return
+            }
+            if (D.pages[target]) {
+              goto(D.pages[target]!, target)
+              return
+            }
+            print(`cd: no such directory: ${esc(target)} — try 'ls'`, 'red')
+          }
+        },
+        ls: {
+          desc: 'list site pages',
+          fn: () => {
+            const links = Object.entries(D.pages)
+              .map(([name, url]) => link(url, `${name}/`))
+              .join('   ')
+            print(links)
+          }
+        },
+        search: {
+          desc: 'open site search',
+          fn: () => goto(D.pages.search!, 'search')
+        },
+        neofetch: { desc: 'system information', fn: () => neofetch() },
+        contact: {
+          desc: 'where to find me',
+          fn: () => {
+            print(
+              `<span class='amber'>GitHub</span> : <a href='${D.github}' target='_blank' rel='noopener'>${D.github}</a>`
+            )
+            print(
+              `<span class='amber'>Blog</span>   : leave a comment under any post — I read them all.`
+            )
+          }
+        },
+        snow: {
+          desc: 'let it snow ❄ (toggle)',
+          fn: () => {
+            const on = toggleSnow()
+            print(
+              on
+                ? `Snowfall enabled. It's always snowing in Yokohama. ❄`
+                : 'Snowfall disabled. The sky clears.'
+            )
+          }
+        },
+        echo: { desc: 'print text', fn: (args) => print(esc(args.join(' '))) },
+        date: { desc: 'current date & time', fn: () => print(esc(new Date().toString())) },
+        whoami: {
+          desc: 'who are you?',
+          fn: () => print(`visitor — just another traveler passing through the snow.`)
+        },
+        history: {
+          desc: 'command history',
+          fn: () =>
+            history.forEach((h, i) =>
+              print(` <span class='dim'>${String(i + 1).padStart(3, ' ')}</span>  ${esc(h)}`)
+            )
+        },
+        banner: { desc: 'reprint the banner', fn: () => printBanner() },
+        clear: {
+          desc: 'clear the screen',
+          fn: () => {
+            output.innerHTML = ''
+          }
+        },
+        exit: {
+          desc: 'leave the terminal',
+          fn: () => {
+            print('logout')
+            setTimeout(() => {
+              window.location.href = D.pages.home!
+            }, 350)
+          }
+        },
+        // ---- hidden easter eggs ----
+        pwd: { desc: '', hidden: true, fn: () => print('/home/visitor/yokohama-snowly') },
+        posts: { desc: '', hidden: true, fn: () => listPosts() },
+        github: { desc: '', hidden: true, fn: () => commands.contact!.fn([]) },
+        hello: {
+          desc: '',
+          hidden: true,
+          fn: () => print(`Hello there. Welcome to Yokohama Snowly. ❄`)
+        },
+        hi: { desc: '', hidden: true, fn: () => commands.hello!.fn([]) },
+        sudo: {
+          desc: '',
+          hidden: true,
+          fn: async () => {
+            print('[sudo] password for visitor: ')
+            await sleep(600)
+            print(`Nice try. This incident will be reported to /dev/null.`, 'red')
+          }
+        },
+        rm: {
+          desc: '',
+          hidden: true,
+          fn: async (args) => {
+            if (args.join(' ').includes('-rf')) {
+              print(`rm: removing /home/visitor/yokohama-snowly ...`)
+              await sleep(700)
+              print(`rm: removing all those carefully written posts ...`)
+              await sleep(700)
+              print(`Just kidding. This terminal is read-only — the snow is safe. ❄`, 'amber')
+            } else {
+              print(`rm: permission denied (this is a museum, not a shell)`, 'red')
+            }
+          }
+        },
+        vim: {
+          desc: '',
+          hidden: true,
+          fn: () => print(`You are now trapped in vim. Type ':q!' to escape.`)
+        },
+        ':q!': { desc: '', hidden: true, fn: () => print('You are free. That was close.') },
+        ':wq': { desc: '', hidden: true, fn: () => print('Saved nothing. Quit everything.') }
+      }
+
+      // ---------- input handling ----------
+      function renderTyped() {
+        typedEl.textContent = cmdInput.value
+      }
+
+      async function runCommand(raw: string) {
+        const line = raw.trim()
+        print(`<span class='prompt'>visitor@snowly:~$</span> ${esc(raw)}`)
+        if (line === '') return
+        history.push(line)
+        historyIdx = history.length
+        const parts = line.split(/\s+/)
+        const name = (parts.shift() ?? '').toLowerCase()
+        const command = commands[name]
+        if (command) {
+          await command.fn(parts)
+        } else {
+          print(`snowsh: command not found: ${esc(name)} — type 'help'`, 'red')
+        }
+        print()
+      }
+
+      function completions(value: string): string[] {
+        const parts = value.split(/\s+/)
+        if (parts.length <= 1) {
+          const prefix = (parts[0] ?? '').toLowerCase()
+          return Object.entries(commands)
+            .filter(([n, c]) => !c.hidden && n.startsWith(prefix))
+            .map(([n]) => n)
+        }
+        const cmd = (parts[0] ?? '').toLowerCase()
+        if (cmd === 'cd' || cmd === 'open') {
+          const prefix = (parts[1] ?? '').toLowerCase()
+          return Object.keys(D.pages)
+            .filter((p) => p.startsWith(prefix))
+            .map((p) => `${cmd} ${p}`)
+        }
+        return []
+      }
+
+      cmdInput.addEventListener('input', renderTyped)
+
+      cmdInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const value = cmdInput.value
+          cmdInput.value = ''
+          renderTyped()
+          void runCommand(value)
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault()
+          if (historyIdx > 0) {
+            historyIdx--
+            cmdInput.value = history[historyIdx] ?? ''
+            renderTyped()
+          }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault()
+          if (historyIdx < history.length) {
+            historyIdx++
+            cmdInput.value = history[historyIdx] ?? ''
+            renderTyped()
+          }
+        } else if (e.key === 'Tab') {
+          e.preventDefault()
+          const matches = completions(cmdInput.value)
+          if (matches.length === 1) {
+            cmdInput.value = `${matches[0]} `
+            renderTyped()
+          } else if (matches.length > 1) {
+            print(`<span class='prompt'>visitor@snowly:~$</span> ${esc(cmdInput.value)}`)
+            print(matches.map((m) => esc(m.split(' ').pop() ?? m)).join('   '), 'dim')
+          }
+        } else if (e.key === 'l' && e.ctrlKey) {
+          e.preventDefault()
+          output.innerHTML = ''
+        } else if (e.key === 'c' && e.ctrlKey) {
+          e.preventDefault()
+          print(`<span class='prompt'>visitor@snowly:~$</span> ${esc(cmdInput.value)}^C`)
+          cmdInput.value = ''
+          renderTyped()
+        }
+      })
+
+      screen.addEventListener('click', () => {
+        if ((window.getSelection()?.toString() ?? '') === '') cmdInput.focus()
+      })
+
+      // ---------- boot ----------
+      const skip = () => {
+        skipBoot = true
+      }
+      window.addEventListener('keydown', skip, { once: true })
+      window.addEventListener('pointerdown', skip, { once: true })
+
+      async function boot() {
+        const cores = navigator.hardwareConcurrency ?? 4
+        await typeLine('SNOWLY BIOS v4.0.8 — Yokohama Snowly Bootloader', 'dim', 140)
+        await typeLine(`[    0.000042] CPU: ${cores} cores detected`, 'dim', 320)
+        await typeLine(
+          '[    0.004096] Memory check: 640K OK — should be enough for anybody',
+          'dim',
+          320
+        )
+        await typeLine('[    0.010101] Mounting /dev/blog .............. [ OK ]', 'dim', 320)
+        await typeLine('[    0.031415] Loading module: snowfall.ko ..... [ OK ]', 'dim', 320)
+        await typeLine('[    0.062832] Starting snowsh v1.0 ............ [ OK ]', 'dim', 320)
+        if (!skipBoot) await sleep(250)
+        print()
+        printBanner()
+        await typeLine(`Welcome to ${D.siteTitle} — terminal edition.`, '', 120)
+        await typeLine(`Type 'help' to see what this thing can do.`, '', 120)
+        print()
+        inputLine.style.display = ''
+        cmdInput.focus()
+        scrollDown()
+      }
+
+      void boot()
+    </script>
+
+    <style is:global>
+      :root {
+        --term-fg: #9ce4ff; /* icy light blue — Yokohama Snowly */
+        --term-dim: #4e93b8;
+        --term-amber: #ffc66d;
+        --term-bright: #e9fbff;
+        --term-red: #ff6b6b;
+        --term-bg: #02070c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background: var(--term-bg);
+        color: var(--term-fg);
+        font-family:
+          ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      ::selection {
+        background: var(--term-fg);
+        color: #02222e;
+      }
+
+      #crt {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        background: radial-gradient(ellipse at center, #081522 0%, var(--term-bg) 80%);
+        overflow: hidden;
+      }
+
+      /* scanlines + RGB mask */
+      #crt::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        pointer-events: none;
+        background:
+          linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.05),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.05)
+          );
+        background-size:
+          100% 3px,
+          4px 100%;
+      }
+
+      /* vignette + flicker */
+      #crt::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 11;
+        pointer-events: none;
+        background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+        animation: flicker 0.15s infinite;
+      }
+
+      @keyframes flicker {
+        0% {
+          opacity: 0.92;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.96;
+        }
+      }
+
+      #bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.55rem 1rem;
+        border-bottom: 1px dashed rgba(156, 228, 255, 0.35);
+        color: var(--term-dim);
+        text-shadow: 0 0 6px rgba(156, 228, 255, 0.35);
+        flex: none;
+        z-index: 5;
+      }
+
+      .bar-exit {
+        color: var(--term-amber);
+        text-decoration: none;
+      }
+
+      .bar-exit:hover {
+        text-shadow: 0 0 8px rgba(255, 198, 109, 0.8);
+      }
+
+      #screen {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 1.1rem 3rem;
+        text-shadow:
+          0 0 4px rgba(156, 228, 255, 0.4),
+          0 0 12px rgba(156, 228, 255, 0.18);
+        cursor: text;
+        scrollbar-width: thin;
+        scrollbar-color: var(--term-dim) transparent;
+      }
+
+      .line {
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        min-height: 1.5em;
+      }
+
+      .line.banner {
+        font-size: clamp(7px, 2.1vw, 14px);
+        line-height: 1.25;
+      }
+
+      .glow {
+        text-shadow:
+          0 0 5px rgba(156, 228, 255, 0.55),
+          0 0 14px rgba(156, 228, 255, 0.35);
+      }
+
+      .dim {
+        color: var(--term-dim);
+      }
+
+      .amber {
+        color: var(--term-amber);
+      }
+
+      .red,
+      .line.red {
+        color: var(--term-red);
+      }
+
+      .cmd-name {
+        color: var(--term-bright);
+      }
+
+      .prompt {
+        color: var(--term-amber);
+      }
+
+      #screen a {
+        color: var(--term-bright);
+        text-decoration: none;
+        border-bottom: 1px dotted rgba(233, 251, 255, 0.5);
+      }
+
+      #screen a:hover {
+        background: rgba(156, 228, 255, 0.12);
+        text-shadow: 0 0 8px rgba(233, 251, 255, 0.8);
+      }
+
+      #input-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+      }
+
+      #typed {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      #caret {
+        animation: blink 1.05s steps(1) infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* real input stays invisible but focusable (mobile keyboard support) */
+      #cmd {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 2px;
+        height: 2px;
+        opacity: 0;
+        border: none;
+        padding: 0;
+        background: transparent;
+        color: transparent;
+      }
+
+      #snow-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      .flake {
+        position: absolute;
+        top: -20px;
+        color: rgba(255, 255, 255, 0.75);
+        text-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+        animation-name: fall;
+        animation-timing-function: linear;
+        animation-fill-mode: forwards;
+      }
+
+      @keyframes fall {
+        to {
+          transform: translateY(105vh);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #crt::after,
+        #caret,
+        .flake {
+          animation: none;
+        }
+      }
+    </style>
+  </body>
+</html>
