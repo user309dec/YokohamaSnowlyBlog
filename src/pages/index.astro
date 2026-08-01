@@ -5,6 +5,7 @@ import Quote from '@/components/home/Quote.astro'
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
 import { FormattedDate } from 'astro-pure/user'
 import heroVisual from '@/assets/projects/angelica-teran-Bk9hpaXHK4o-unsplash.jpg'
+import HeroFluid from '@/components/custom/HeroFluid.astro'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import Section from '@/components/home/Section.astro'
 import SkillLayout from '@/components/home/SkillLayout.astro'
@@ -44,6 +45,7 @@ const education = [
           sizes='100vw'
         />
         <div class='hero-veil absolute inset-0' aria-hidden='true'></div>
+        <HeroFluid />
       </div>
 
       <div class='relative z-10 mx-auto flex min-h-[88vh] w-full max-w-[70rem] flex-col justify-end px-4 pb-14 pt-28 sm:px-7 sm:pb-16 lg:px-10'>
